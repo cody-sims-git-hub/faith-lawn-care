@@ -1,23 +1,23 @@
 ---
 interface Props {
-  /** Renders the section as a raised, striped band. */
-  band?: boolean;
-  id?: string;
-  class?: string;
-  /** Vertical rhythm. */
-  size?: "sm" | "md" | "lg";
+ /** Renders the section as a raised, striped band. */
+ band?: boolean;
+ id?: string;
+ class?: string;
+ /** Vertical rhythm. */
+ size?: "sm" | "md" | "lg";
 }
 const { band = false, id, class: className = "", size = "md" } = Astro.props;
 
 const pad = {
-  sm: "py-12 sm:py-16",
-  md: "py-16 sm:py-24",
-  lg: "py-20 sm:py-32",
+ sm: "py-12 sm:py-16",
+ md: "py-16 sm:py-24",
+ lg: "py-20 sm:py-32",
 }[size];
 ---
 
-<section id={id} class:list={[band && "section-band", pad, className]}>
-  <div class="mx-auto max-w-7xl px-4 sm:px-6">
-    <slot />
-  </div>
+<section id={id} class:list={[band && "section-sunk", pad, className]}>
+ <div class="mx-auto max-w-7xl px-4 sm:px-6">
+ <slot />
+ </div>
 </section>

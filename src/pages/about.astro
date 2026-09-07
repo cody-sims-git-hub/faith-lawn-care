@@ -10,121 +10,121 @@ import { localBusiness, breadcrumbs } from "~/lib/structured-data";
 import { BASE_CITY, BASE_STATE_CODE } from "~/lib/site-meta";
 
 const values = [
-  {
-    icon: Clock,
-    title: "We show up",
-    body: "The most common complaint about lawn companies around here is the one that stopped coming without saying anything. If we cannot make a day, you hear it from us first.",
-  },
-  {
-    icon: Handshake,
-    title: "Straight pricing",
-    body: "A firm number before we start, and it does not move unless you ask for something different. No contracts, no auto-renew, no cancellation fee.",
-  },
-  {
-    icon: Truck,
-    title: "It leaves with us",
-    body: "Clippings, limbs, leaves, and debris go on the trailer. You should not have to deal with a pile at the curb after paying someone to clean up.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Insured",
-    body: "We carry liability coverage and will show proof before work starts — especially worth asking about for tree work and commercial property.",
-  },
+ {
+ icon: Clock,
+ title: "We show up",
+ body: "The most common complaint about lawn companies around here is the one that stopped coming without saying anything. If we cannot make a day, you hear it from us first.",
+ },
+ {
+ icon: Handshake,
+ title: "Straight pricing",
+ body: "A firm number before we start, and it does not move unless you ask for something different. No contracts, no auto-renew, no cancellation fee.",
+ },
+ {
+ icon: Truck,
+ title: "It leaves with us",
+ body: "Clippings, limbs, leaves, and debris go on the trailer. You should not have to deal with a pile at the curb after paying someone to clean up.",
+ },
+ {
+ icon: ShieldCheck,
+ title: "Insured",
+ body: "We carry liability coverage and will show proof before work starts — especially worth asking about for tree work and commercial property.",
+ },
 ];
 
 const jsonLd = [
-  localBusiness(),
-  breadcrumbs([
-    { name: "Home", path: "/" },
-    { name: "About", path: "/about" },
-  ]),
+ localBusiness(),
+ breadcrumbs([
+ { name: "Home", path: "/" },
+ { name: "About", path: "/about" },
+ ]),
 ];
 ---
 
 <Layout
-  title="About Faith Lawn Care | Marianna, Florida"
-  description="Faith Lawn Care is a local, insured, full-service lawn care and junk removal company based in Marianna, FL, serving Jackson, Calhoun, and Liberty counties."
-  path="/about"
-  jsonLd={jsonLd}
+ title="About Faith Lawn Care | Marianna, Florida"
+ description="Faith Lawn Care is a local, insured, full-service lawn care and junk removal company based in Marianna, FL, serving Jackson, Calhoun, and Liberty counties."
+ path="/about"
+ jsonLd={jsonLd}
 >
-  <PageHeader eyebrow="Who we are" title="About Faith Lawn Care">
-    A local crew out of {BASE_CITY}, {BASE_STATE_CODE}, doing the whole job —
-    lawn care, landscaping, tree work, pressure washing, and hauling.
-  </PageHeader>
+ <PageHeader eyebrow="Who we are" title="About Faith Lawn Care">
+ A local crew out of {BASE_CITY}, {BASE_STATE_CODE}, doing the whole job —
+ lawn care, landscaping, tree work, pressure washing, and hauling.
+ </PageHeader>
 
-  <Section>
-    <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
-      <div data-reveal>
-        <div class="space-y-5 text-lg leading-relaxed text-muted-foreground">
-          <p>
-            Faith Lawn Care is a family-run operation based in Marianna. We
-            started out mowing yards around Jackson County, and the business grew
-            the way these things do around here — one customer telling a
-            neighbour, then that neighbour asking whether we also did the hedges,
-            the pressure washing, or the pile behind the shed.
-          </p>
-          <p>
-            So we do. That is why the truck says lawn care <em>and</em> junk
-            removal. Most of the properties we look after need more than a cut,
-            and it is easier for everyone if one crew handles the lot rather than
-            you lining up three companies who each blame the other.
-          </p>
-          <p>
-            We are not the biggest outfit in the county and we are not trying to
-            be. What we are trying to be is the one that answers the phone, gives
-            you a real price, and turns up on the day.
-          </p>
-        </div>
-      </div>
+ <Section>
+ <div class="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+ <div data-reveal>
+ <div class="space-y-5 text-lg leading-relaxed text-ink-soft">
+ <p>
+ Faith Lawn Care is a family-run operation based in Marianna. We
+ started out mowing yards around Jackson County, and the business grew
+ the way these things do around here — one customer telling a
+ neighbour, then that neighbour asking whether we also did the hedges,
+ the pressure washing, or the pile behind the shed.
+ </p>
+ <p>
+ So we do. That is why the truck says lawn care <em>and</em> junk
+ removal. Most of the properties we look after need more than a cut,
+ and it is easier for everyone if one crew handles the lot rather than
+ you lining up three companies who each blame the other.
+ </p>
+ <p>
+ We are not the biggest outfit in the county and we are not trying to
+ be. What we are trying to be is the one that answers the phone, gives
+ you a real price, and turns up on the day.
+ </p>
+ </div>
+ </div>
 
-      <div class="scene" data-reveal="right">
-        <div class="preserve-3d relative" style="transform: rotateY(6deg) rotateX(3deg);">
-          <Image
-            src={lawnPhoto}
-            alt="A wide striped lawn cut by Faith Lawn Care in Jackson County, Florida"
-            widths={[480, 720, 960]}
-            sizes="(min-width: 1024px) 45vw, 90vw"
-            quality={68}
-            loading="lazy"
-            class="w-full rounded-2xl border border-border/70 shadow-2xl"
-          />
-          <div
-            class="pointer-events-none absolute -inset-6 -z-10 rounded-3xl opacity-40"
-            style="transform: translateZ(-70px); background: radial-gradient(60% 60% at 50% 50%, var(--lime), transparent 70%); filter: blur(46px);"
-            aria-hidden="true"
-          >
-          </div>
-        </div>
-      </div>
-    </div>
-  </Section>
+ <div class="" data-reveal="right">
+ <div class=" relative" style="transform: rotateY(6deg) rotateX(3deg);">
+ <Image
+ src={lawnPhoto}
+ alt="A wide striped lawn cut by Faith Lawn Care in Jackson County, Florida"
+ widths={[480, 720, 960]}
+ sizes="(min-width: 1024px) 45vw, 90vw"
+ quality={68}
+ loading="lazy"
+ class="w-full rounded-md border border-rule/70 shadow-2xl"
+ />
+ <div
+ class="pointer-events-none absolute -inset-6 -z-10 rounded-sm opacity-40"
+ style="transform: translateZ(-70px); background: radial-gradient(60% 60% at 50% 50%, var(--lime), transparent 70%); filter: blur(46px);"
+ aria-hidden="true"
+ >
+ </div>
+ </div>
+ </div>
+ </div>
+ </Section>
 
-  <Section band>
-    <h2 class="font-display text-3xl font-bold uppercase text-foreground" data-reveal>
-      How we work
-    </h2>
-    <div
-      class="mt-10 grid gap-5 sm:grid-cols-2"
-      data-reveal-group
-      data-reveal-stagger="80"
-    >
-      {
-        values.map((value) => (
-          <div class="tilt-card panel rounded-xl p-6" data-reveal data-tilt="4">
-            <span
-              class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/25"
-            >
-              <value.icon class="h-6 w-6" aria-hidden="true" />
-            </span>
-            <h3 class="text-lg font-bold uppercase text-foreground">{value.title}</h3>
-            <p class="mt-2.5 text-base leading-relaxed text-muted-foreground">
-              {value.body}
-            </p>
-          </div>
-        ))
-      }
-    </div>
-  </Section>
+ <Section band>
+ <h2 class="font-display text-3xl text-ink" data-reveal>
+ How we work
+ </h2>
+ <div
+ class="mt-10 grid gap-5 sm:grid-cols-2"
+ data-reveal-group
+ data-reveal-stagger="80"
+ >
+ {
+ values.map((value) => (
+ <div class=" card rounded-md p-6" data-reveal>
+ <span
+ class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-sm bg-field-wash text-field-bright"
+ >
+ <value.icon class="h-6 w-6" aria-hidden="true" />
+ </span>
+ <h3 class="text-lg font-bold text-ink">{value.title}</h3>
+ <p class="mt-2.5 text-base leading-relaxed text-ink-soft">
+ {value.body}
+ </p>
+ </div>
+ ))
+ }
+ </div>
+ </Section>
 
-  <CtaBand />
+ <CtaBand />
 </Layout>

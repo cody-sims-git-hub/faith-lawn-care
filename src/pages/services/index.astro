@@ -8,39 +8,39 @@ import { services } from "~/lib/services";
 import { localBusiness, serviceCatalog, breadcrumbs } from "~/lib/structured-data";
 
 const jsonLd = [
-  localBusiness(),
-  serviceCatalog(services),
-  breadcrumbs([
-    { name: "Home", path: "/" },
-    { name: "Services", path: "/services" },
-  ]),
+ localBusiness(),
+ serviceCatalog(services),
+ breadcrumbs([
+ { name: "Home", path: "/" },
+ { name: "Services", path: "/services" },
+ ]),
 ];
 ---
 
 <Layout
-  title="Lawn Care & Junk Removal Services | Faith Lawn Care"
-  description="Twelve services across Jackson, Calhoun, and Liberty counties — mowing, landscaping, fertilization, tree removal, pressure washing, and junk hauling."
-  path="/services"
-  jsonLd={jsonLd}
+ title="Lawn Care & Junk Removal Services | Faith Lawn Care"
+ description="Twelve services across Jackson, Calhoun, and Liberty counties — mowing, landscaping, fertilization, tree removal, pressure washing, and junk hauling."
+ path="/services"
+ jsonLd={jsonLd}
 >
-  <PageHeader eyebrow="What we do" title="Services">
-    Everything below is done by our own crew — we do not subcontract the work
-    out and then mark it up. If you need something that is not listed, ask;
-    the answer is usually yes.
-  </PageHeader>
+ <PageHeader eyebrow="What we do" title="Services">
+ Everything below is done by our own crew — we do not subcontract the work
+ out and then mark it up. If you need something that is not listed, ask;
+ the answer is usually yes.
+ </PageHeader>
 
-  <Section>
-    <div
-      class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-      data-reveal-group
-      data-reveal-stagger="60"
-    >
-      {services.map((service) => <ServiceCard service={service} />)}
-    </div>
-  </Section>
+ <Section>
+ <div
+ class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+ data-reveal-group
+ data-reveal-stagger="60"
+ >
+ {services.map((service) => <ServiceCard service={service} />)}
+ </div>
+ </Section>
 
-  <CtaBand
-    title="Not sure what you need?"
-    body="That is a normal place to start. Call and describe the property, or text us a photo of it — we will tell you what it actually needs and what it costs."
-  />
+ <CtaBand
+ title="Not sure what you need?"
+ body="That is a normal place to start. Call and describe the property, or text us a photo of it — we will tell you what it actually needs and what it costs."
+ />
 </Layout>

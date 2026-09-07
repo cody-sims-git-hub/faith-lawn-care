@@ -8,93 +8,93 @@ const updated = "September 2026";
 ---
 
 <Layout
-  title="Privacy Policy | Faith Lawn Care"
-  description="How Faith Lawn Care handles the information you send through this website: what we collect, what we do with it, and why nothing is stored on the site."
-  path="/privacy"
+ title="Privacy Policy | Faith Lawn Care"
+ description="How Faith Lawn Care handles the information you send through this website: what we collect, what we do with it, and why nothing is stored on the site."
+ path="/privacy"
 >
-  <PageHeader eyebrow="Legal" title="Privacy Policy">
-    Short version: we use what you send us to get back to you about your job,
-    and nothing else.
-  </PageHeader>
+ <PageHeader eyebrow="Legal" title="Privacy Policy">
+ Short version: we use what you send us to get back to you about your job,
+ and nothing else.
+ </PageHeader>
 
-  <Section>
-    <div class="max-w-3xl space-y-8 text-base leading-relaxed text-muted-foreground">
-      <p class="text-sm text-muted-foreground/70">Last updated: {updated}</p>
+ <Section>
+ <div class="max-w-3xl space-y-8 text-base leading-relaxed text-ink-soft">
+ <p class="text-sm text-ink-soft/70">Last updated: {updated}</p>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          What we collect
-        </h2>
-        <p>
-          If you fill in the estimate form, we collect the name, phone number,
-          town, and any details you type — plus your email address if you choose
-          to give one. That is the whole list. We do not ask for payment details
-          on this website.
-        </p>
-      </div>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ What we collect
+ </h2>
+ <p>
+ If you fill in the estimate form, we collect the name, phone number,
+ town, and any details you type — plus your email address if you choose
+ to give one. That is the whole list. We do not ask for payment details
+ on this website.
+ </p>
+ </div>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          What we do with it
-        </h2>
-        <p>
-          Form submissions are emailed straight to us so we can reply to your
-          request. <strong class="text-foreground">
-            They are not saved to a database on this website
-          </strong> — there is no customer account, no stored lead list, and no
-          marketing list to be added to. Once your request is in our inbox, it is
-          handled like any other message from a customer.
-        </p>
-      </div>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ What we do with it
+ </h2>
+ <p>
+ Form submissions are emailed straight to us so we can reply to your
+ request. <strong class="text-ink">
+ They are not saved to a database on this website
+ </strong> — there is no customer account, no stored lead list, and no
+ marketing list to be added to. Once your request is in our inbox, it is
+ handled like any other message from a customer.
+ </p>
+ </div>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          Who else is involved
-        </h2>
-        <p>
-          This site is hosted on Cloudflare Pages, and the form is protected by
-          Cloudflare Turnstile, which checks that a submission comes from a
-          person rather than a bot. The email itself is delivered by Resend. Each
-          of these providers processes the request only in order to deliver it to
-          us. We do not sell, rent, or share your information with anyone else.
-        </p>
-      </div>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ Who else is involved
+ </h2>
+ <p>
+ This site is hosted on Cloudflare Pages, and the form is protected by
+ Cloudflare Turnstile, which checks that a submission comes from a
+ person rather than a bot. The email itself is delivered by Resend. Each
+ of these providers processes the request only in order to deliver it to
+ us. We do not sell, rent, or share your information with anyone else.
+ </p>
+ </div>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          Cookies and tracking
-        </h2>
-        <p>
-          This website does not set advertising or tracking cookies and does not
-          build a profile of you. Cloudflare may set a strictly necessary cookie
-          as part of the Turnstile bot check and its security protection.
-        </p>
-      </div>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ Cookies and tracking
+ </h2>
+ <p>
+ This website does not set advertising or tracking cookies and does not
+ build a profile of you. Cloudflare may set a strictly necessary cookie
+ as part of the Turnstile bot check and its security protection.
+ </p>
+ </div>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          Getting your information removed
-        </h2>
-        <p>
-          Because nothing is stored on the website, removing your information
-          means deleting the email you sent us. Call or text
-          <a href={TEL_HREF} class="font-semibold text-primary hover:underline">
-            {PHONE_DISPLAY}
-          </a> and ask, and we will delete it.
-        </p>
-      </div>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ Getting your information removed
+ </h2>
+ <p>
+ Because nothing is stored on the website, removing your information
+ means deleting the email you sent us. Call or text
+ <a href={TEL_HREF} class="font-semibold text-field hover:underline">
+ {PHONE_DISPLAY}
+ </a> and ask, and we will delete it.
+ </p>
+ </div>
 
-      <div>
-        <h2 class="mb-3 font-display text-2xl font-bold uppercase text-foreground">
-          Contact
-        </h2>
-        <p>
-          Questions about any of this go to {LEGAL_NAME} at
-          <a href={TEL_HREF} class="font-semibold text-primary hover:underline">
-            {PHONE_DISPLAY}
-          </a>. This policy covers {SITE_URL} only.
-        </p>
-      </div>
-    </div>
-  </Section>
+ <div>
+ <h2 class="mb-3 font-display text-2xl text-ink">
+ Contact
+ </h2>
+ <p>
+ Questions about any of this go to {LEGAL_NAME} at
+ <a href={TEL_HREF} class="font-semibold text-field hover:underline">
+ {PHONE_DISPLAY}
+ </a>. This policy covers {SITE_URL} only.
+ </p>
+ </div>
+ </div>
+ </Section>
 </Layout>

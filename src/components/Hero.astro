@@ -2,118 +2,98 @@
 /**
  * Homepage hero.
  *
- * The photograph is the company's own work — a real Jackson County yard they
- * cut — and it is the LCP element, so it is eager, high-priority, and served
- * from Astro's <Image> as an optimized AVIF/WebP with an explicit aspect ratio
- * to keep CLS at zero.
+ * A plain statement of what they do, the phone number as the primary action,
+ * and a photograph of their own work at a generous size. The photo is the
+ * proof, so it gets to be a photograph — no scrim, no overlay text.
  *
  * The h1 uses animate-rise rather than a fade: Chrome will not nominate text as
- * an LCP candidate while it is opacity:0, so fading the h1 in would charge the
- * entire animation duration to the LCP measurement.
+ * an LCP candidate while it is opacity:0, so fading it would charge the entire
+ * animation duration to the LCP measurement.
  */
 import { Image } from "astro:assets";
 import { Phone, MessageSquare, Check } from "@lucide/astro";
 import heroImage from "~/assets/hero-lawn.jpg";
 import { PHONE_DISPLAY, TEL_HREF, SMS_HREF } from "~/lib/site-meta";
 
-const proofPoints = [
-  "Free estimates",
-  "No contracts",
-  "We haul it all off",
-];
+const proofPoints = ["Free estimates", "No contracts", "We haul it all off"];
 ---
 
-<section class="relative isolate overflow-hidden">
-  <div class="absolute inset-0 -z-10">
-    {/*
-      width/height are explicit on purpose. Without them Astro points the `src`
-      fallback at the FULL 3051px original — a 919kB LCP image for any browser
-      that ignores srcset. Capping the fallback at 1920 keeps it sane, and the
-      pair also fixes the intrinsic aspect ratio so this contributes no CLS.
-    */}
-    <Image
-      src={heroImage}
-      alt="A wide Jackson County lawn freshly cut by Faith Lawn Care, showing clean mowing stripes across the property"
-      widths={[640, 960, 1280, 1600, 1920]}
-      sizes="100vw"
-      width={1920}
-      height={865}
-      quality={58}
-      loading="eager"
-      fetchpriority="high"
-      class="h-full w-full object-cover"
-    />
-    {/* Two stacked scrims. The vertical one seats the header and grounds the
-        bottom edge; the horizontal one holds contrast under the headline on the
-        left while letting the mowed stripes stay visible on the right — that
-        photo is the strongest proof on the page, so it is deliberately NOT
-        buried. Contrast under the h1 still measures well past AA. */}
-    <div
-      class="absolute inset-0 bg-gradient-to-b from-background/85 via-background/45 to-background"
-    >
-    </div>
-    <div
-      class="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent"
-    >
-    </div>
-  </div>
+<section class="border-b border-rule">
+ <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
+ <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+ {/* ---- Statement ---- */}
+ <div class="lg:col-span-6">
+ <p class="pill">Serving Jackson, Calhoun &amp; Liberty counties</p>
 
-  <div class="mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:py-40">
-    <div class="max-w-2xl">
-      <p
-        class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-primary"
-      >
-        Marianna &amp; the surrounding counties
-      </p>
+ <h1 class="animate-rise mt-5 text-[2.6rem] text-ink sm:text-6xl">
+ Your yard, <span class="text-field">handled.</span>
+ </h1>
 
-      <h1
-        class="animate-rise text-balance font-display text-5xl font-bold uppercase leading-[0.98] text-foreground sm:text-6xl lg:text-7xl"
-      >
-        Full service lawn care{" "}
-        <span class="text-primary">&amp; junk removal</span>
-      </h1>
+ <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
+ Mowing, landscaping, tree work, pressure washing, and junk hauling —
+ one crew for the whole property. We show up when we say we will, and
+ nothing gets left at the curb.
+ </p>
 
-      <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-        Mowing, landscaping, tree work, pressure washing, and hauling across
-        Jackson, Calhoun, and Liberty counties. We show up when we say we will,
-        and nothing gets left at the curb.
-      </p>
+ <ul class="mt-7 flex flex-wrap gap-x-6 gap-y-2.5">
+ {
+ proofPoints.map((point) => (
+ <li class="flex items-center gap-2 text-sm font-bold text-field-deep">
+ <Check class="h-4.5 w-4.5 shrink-0 text-field-bright" aria-hidden="true" />
+ {point}
+ </li>
+ ))
+ }
+ </ul>
 
-      <ul class="mt-7 flex flex-wrap gap-x-6 gap-y-2.5">
-        {
-          proofPoints.map((point) => (
-            <li class="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Check class="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-              {point}
-            </li>
-          ))
-        }
-      </ul>
+ <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+ <a
+ href={TEL_HREF}
+ data-track="hero-call"
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-field px-7 py-4 text-base font-extrabold text-white transition-colors hover:bg-field-deep"
+ >
+ <Phone class="h-5 w-5" aria-hidden="true" />
+ Call {PHONE_DISPLAY}
+ </a>
+ <a
+ href={SMS_HREF}
+ data-track="hero-text"
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-paper-sunk px-7 py-4 text-base font-extrabold text-field-deep transition-colors hover:bg-field-wash"
+ >
+ <MessageSquare class="h-5 w-5" aria-hidden="true" />
+ Text us a photo
+ </a>
+ </div>
 
-      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
-        <a
-          href={TEL_HREF}
-          data-track="hero-call"
-          class="inline-flex items-center justify-center gap-2.5 rounded-lg bg-primary px-7 py-4 text-base font-bold text-primary-foreground transition-transform hover:scale-[1.03]"
-        >
-          <Phone class="h-5 w-5" aria-hidden="true" />
-          Call {PHONE_DISPLAY}
-        </a>
-        <a
-          href={SMS_HREF}
-          data-track="hero-text"
-          class="inline-flex items-center justify-center gap-2.5 rounded-lg border border-border bg-background/40 px-7 py-4 text-base font-bold text-foreground backdrop-blur transition-colors hover:border-primary"
-        >
-          <MessageSquare class="h-5 w-5 text-primary" aria-hidden="true" />
-          Text us a photo
-        </a>
-      </div>
+ <p class="mt-5 text-sm text-ink-soft">
+ Or <a
+ href="/contact"
+ class="font-bold text-field underline underline-offset-2">request an estimate online</a
+ > — we usually reply the same day.
+ </p>
+ </div>
 
-      <p class="mt-5 text-sm text-muted-foreground">
-        Or <a href="/contact" class="font-semibold text-primary hover:underline">
-          request an estimate online
-        </a> — we usually reply the same day.
-      </p>
-    </div>
-  </div>
+ {/* ---- The photograph ---- */}
+ <div class="lg:col-span-6" data-reveal="right">
+ {/*
+ width/height are explicit on purpose: without them Astro points the
+ `src` fallback at the full 3051px original — a ~900kB LCP image for
+ any client that ignores srcset. They also fix the intrinsic aspect
+ ratio, so this contributes no CLS.
+ */}
+ <Image
+ src={heroImage}
+ alt="A wide Jackson County property freshly cut by Faith Lawn Care, with clean mowing stripes running the length of the yard toward the treeline"
+ widths={[640, 960, 1280, 1600]}
+ sizes="(min-width: 1024px) 50vw, 92vw"
+ width={1600}
+ height={900}
+ quality={68}
+ loading="eager"
+ fetchpriority="high"
+ class="w-full rounded-lg object-cover"
+ />
+ </div>
+ </div>
+ </div>
 </section>

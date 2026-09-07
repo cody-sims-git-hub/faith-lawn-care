@@ -2,61 +2,61 @@
 import { ChevronRight } from "@lucide/astro";
 
 interface Props {
-  eyebrow?: string;
-  title: string;
-  /** Breadcrumb trail, excluding Home (added automatically) and the current page. */
-  trail?: Array<{ name: string; path: string }>;
+ eyebrow?: string;
+ title: string;
+ /** Breadcrumb trail, excluding Home (added automatically) and the current page. */
+ trail?: Array<{ name: string; path: string }>;
 }
 const { eyebrow, title, trail = [] } = Astro.props;
 ---
 
-<section class="relative isolate overflow-hidden border-b border-border/70">
-  <div
-    class="absolute inset-0 -z-10"
-    style="background: radial-gradient(80% 120% at 20% 0%, oklch(0.79 0.178 133 / 0.13), transparent 60%);"
-    aria-hidden="true"
-  >
-  </div>
+<section class="relative isolate overflow-hidden border-b border-rule/70">
+ <div
+ class="absolute inset-0 -z-10"
+ style="background: radial-gradient(80% 120% at 20% 0%, oklch(0.79 0.178 133 / 0.13), transparent 60%);"
+ aria-hidden="true"
+ >
+ </div>
 
-  <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
-    <nav aria-label="Breadcrumb" class="mb-6">
-      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-        <li><a href="/" class="hover:text-foreground">Home</a></li>
-        {
-          trail.map((step) => (
-            <>
-              <li aria-hidden="true">
-                <ChevronRight class="h-3.5 w-3.5" />
-              </li>
-              <li>
-                <a href={step.path} class="hover:text-foreground">
-                  {step.name}
-                </a>
-              </li>
-            </>
-          ))
-        }
-        <li aria-hidden="true">
-          <ChevronRight class="h-3.5 w-3.5" />
-        </li>
-        <li class="font-semibold text-foreground" aria-current="page">{title}</li>
-      </ol>
-    </nav>
+ <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
+ <nav aria-label="Breadcrumb" class="mb-6">
+ <ol class="flex flex-wrap items-center gap-1.5 text-sm text-ink-soft">
+ <li><a href="/" class="hover:text-ink">Home</a></li>
+ {
+ trail.map((step) => (
+ <>
+ <li aria-hidden="true">
+ <ChevronRight class="h-3.5 w-3.5" />
+ </li>
+ <li>
+ <a href={step.path} class="hover:text-ink">
+ {step.name}
+ </a>
+ </li>
+ </>
+ ))
+ }
+ <li aria-hidden="true">
+ <ChevronRight class="h-3.5 w-3.5" />
+ </li>
+ <li class="font-semibold text-ink" aria-current="page">{title}</li>
+ </ol>
+ </nav>
 
-    {
-      eyebrow && (
-        <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-primary">
-          {eyebrow}
-        </p>
-      )
-    }
+ {
+ eyebrow && (
+ <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-field">
+ {eyebrow}
+ </p>
+ )
+ }
 
-    <h1 class="max-w-4xl text-balance font-display text-5xl font-bold uppercase leading-[1] sm:text-6xl">
-      {title}
-    </h1>
+ <h1 class="max-w-4xl text-balance font-display text-5xl leading-[1] sm:text-6xl">
+ {title}
+ </h1>
 
-    <div class="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-      <slot />
-    </div>
-  </div>
+ <div class="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
+ <slot />
+ </div>
+ </div>
 </section>

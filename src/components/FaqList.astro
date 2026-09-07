@@ -11,37 +11,37 @@ import { Plus } from "@lucide/astro";
 import { faqs } from "~/lib/faq";
 
 interface Props {
-  /** Limit to the first N questions. */
-  limit?: number;
+ /** Limit to the first N questions. */
+ limit?: number;
 }
 const { limit } = Astro.props;
 const items = limit ? faqs.slice(0, limit) : faqs;
 ---
 
-<div class="divide-y divide-border/70 border-y border-border/70" data-reveal-group>
-  {
-    items.map((faq) => (
-      <details class="group py-1" data-reveal="fade">
-        <summary
-          class="flex cursor-pointer list-none items-start justify-between gap-4 py-5 text-left"
-        >
-          <h3 class="text-lg font-bold text-foreground">{faq.q}</h3>
-          <Plus
-            class="mt-1 h-5 w-5 shrink-0 text-primary transition-transform duration-300 group-open:rotate-45"
-            aria-hidden="true"
-          />
-        </summary>
-        <p class="pb-6 pr-10 text-base leading-relaxed text-muted-foreground">
-          {faq.a}
-        </p>
-      </details>
-    ))
-  }
+<div class="divide-y divide-rule/70 border-y border-rule/70" data-reveal-group>
+ {
+ items.map((faq) => (
+ <details class="group py-1" data-reveal="fade">
+ <summary
+ class="flex cursor-pointer list-none items-start justify-between gap-4 py-5 text-left"
+ >
+ <h3 class="text-lg font-bold text-ink">{faq.q}</h3>
+ <Plus
+ class="mt-1 h-5 w-5 shrink-0 text-field transition-transform duration-300 group-open:rotate-45"
+ aria-hidden="true"
+ />
+ </summary>
+ <p class="pb-6 pr-10 text-base leading-relaxed text-ink-soft">
+ {faq.a}
+ </p>
+ </details>
+ ))
+ }
 </div>
 
 <style>
-  /* Safari still paints the default disclosure marker without this. */
-  summary::-webkit-details-marker {
-    display: none;
-  }
+ /* Safari still paints the default disclosure marker without this. */
+ summary::-webkit-details-marker {
+ display: none;
+ }
 </style>
