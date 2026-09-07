@@ -4,6 +4,8 @@ import { SITE_URL, SITE_NAME, OG_IMAGE } from "~/lib/site-meta";
 import SiteHeader from "~/components/SiteHeader.astro";
 import SiteFooter from "~/components/SiteFooter.astro";
 import CallBar from "~/components/CallBar.astro";
+import TopBar from "~/components/TopBar.astro";
+import QuotePopup from "~/components/QuotePopup.astro";
 
 interface Props {
  title: string;
@@ -94,18 +96,20 @@ const ogImageUrl = ogImage
  <body>
  <a
  href="#main"
- class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-sm focus:bg-field focus:px-4 focus:py-2 focus:font-semibold focus:text-white"
+ class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-sm focus:bg-forest focus:px-4 focus:py-2 focus:font-semibold focus:text-white"
  >
  Skip to content
  </a>
 
  <div class="relative flex min-h-svh flex-col">
- <SiteHeader />
+ <TopBar />
+      <SiteHeader />
  <main id="main" class="flex-1">
  <slot />
  </main>
  <SiteFooter />
  <CallBar />
+      <QuotePopup />
  </div>
 
  <script>

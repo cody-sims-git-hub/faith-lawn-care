@@ -317,7 +317,7 @@ const nodeData = nodes.map((n) => ({
  {/* ---- The plat ---- */}
  <div class="card overflow-hidden" data-reveal>
  <div class="flex items-baseline justify-between gap-4 border-b border-rule px-5 py-3">
- <span class="label-caps text-field">Service area</span>
+ <span class="label-caps text-grass">Service area</span>
  <span class="text-sm text-ink-soft">Florida Panhandle</span>
  </div>
 
@@ -497,7 +497,7 @@ const nodeData = nodes.map((n) => ({
 
  {/* ---- Record card, driven by the map selection ---- */}
  <div class="card-filed p-6" data-reveal="right" x-cloak>
- <p class="label-caps text-field">Coverage detail</p>
+ <p class="label-caps text-grass">Coverage detail</p>
 
  <h3 class="mt-3 font-display text-3xl text-ink" x-text="town.name">
  {hub.name}
@@ -509,7 +509,7 @@ const nodeData = nodes.map((n) => ({
 
  <dl class="mt-6 space-y-4 border-t border-rule pt-5">
  <div class="flex items-start gap-3">
- <Clock class="mt-0.5 h-5 w-5 shrink-0 text-field" aria-hidden="true" />
+ <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
  <div>
  <dt class="label-caps text-ink-faint">Drive time from Marianna</dt>
  <dd class="mt-0.5 text-base font-bold text-ink">
@@ -524,7 +524,7 @@ const nodeData = nodes.map((n) => ({
  </div>
 
  <div class="flex items-start gap-3">
- <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-field" aria-hidden="true" />
+ <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
  <div>
  <dt class="label-caps text-ink-faint">Coverage tier</dt>
  <dd class="mt-0.5 text-base font-bold text-ink" x-text="tierLabel(town.tier)">
@@ -537,7 +537,7 @@ const nodeData = nodes.map((n) => ({
  <template x-if="town.hasPage">
  <a
  x-bind:href="'/service-areas/' + town.slug"
- class="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-field underline underline-offset-2"
+ class="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-grass underline underline-offset-2"
  >
  <span x-text="'Lawn care in ' + town.name"></span>
  <ArrowRight class="h-4 w-4" aria-hidden="true" />
@@ -571,7 +571,7 @@ const nodeData = nodes.map((n) => ({
  <li>
  <a
  href={`/service-areas/${a.slug}`}
- class="text-sm font-semibold text-field underline underline-offset-2"
+ class="text-sm font-semibold text-grass underline underline-offset-2"
  >
  {a.name}
  </a>

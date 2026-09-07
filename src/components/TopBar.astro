@@ -1,0 +1,56 @@
+---
+/**
+ * Dark utility bar above the header: phone, hours, base, and social.
+ *
+ * Taken from the reference site's structure. It puts the three things a local
+ * service customer checks first — can I call, are they open, do they come here —
+ * above everything else, and it costs one row.
+ *
+ * Hidden below `md`: on a phone this would push the header down for no gain,
+ * and the sticky call bar already carries the phone number there.
+ */
+import { Phone, Clock, MapPin } from "@lucide/astro";
+import FacebookIcon from "./FacebookIcon.astro";
+import {
+  PHONE_DISPLAY,
+  TEL_HREF,
+  FACEBOOK_URL,
+  BASE_CITY,
+  BASE_STATE_CODE,
+} from "~/lib/site-meta";
+---
+
+<div class="hidden bg-forest-deep text-on-dark-soft md:block">
+  <div
+    class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-2 text-xs sm:px-6"
+  >
+    <div class="flex items-center gap-6">
+      <a
+        href={TEL_HREF}
+        data-track="topbar-call"
+        class="flex items-center gap-1.5 font-semibold text-white transition-colors hover:text-gold"
+      >
+        <Phone class="h-3.5 w-3.5" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+      <span class="flex items-center gap-1.5">
+        <Clock class="h-3.5 w-3.5" aria-hidden="true" />
+        Mon–Fri 7am–6pm · Sat 8am–4pm
+      </span>
+      <span class="hidden items-center gap-1.5 lg:flex">
+        <MapPin class="h-3.5 w-3.5" aria-hidden="true" />
+        {BASE_CITY}, {BASE_STATE_CODE} — we come to you
+      </span>
+    </div>
+
+    <a
+      href={FACEBOOK_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-gold hover:text-forest-deep"
+      aria-label="Faith Lawn Care on Facebook"
+    >
+      <FacebookIcon class="h-3.5 w-3.5" />
+    </a>
+  </div>
+</div>

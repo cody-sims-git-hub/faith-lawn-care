@@ -1,99 +1,108 @@
 ---
 /**
- * Homepage hero.
+ * Homepage hero, modelled on the reference site (mysecurtek.com).
  *
- * A plain statement of what they do, the phone number as the primary action,
- * and a photograph of their own work at a generous size. The photo is the
- * proof, so it gets to be a photograph — no scrim, no overlay text.
+ * A deep green gradient over the company's own photograph, heavily dimmed so it
+ * reads as texture rather than competing with the headline. Above it: a pill
+ * eyebrow with a live dot, a two-tone headline (white then gold), a lede, pill
+ * CTAs, and a stat row divided off by a hairline.
+ *
+ * The stats translate the reference's "35+ / 24/7 / 100% Local / 0 Contractors"
+ * idea into what actually matters here — and every one is true and checkable
+ * against the rest of the site, not marketing filler.
  *
  * The h1 uses animate-rise rather than a fade: Chrome will not nominate text as
  * an LCP candidate while it is opacity:0, so fading it would charge the entire
  * animation duration to the LCP measurement.
  */
 import { Image } from "astro:assets";
-import { Phone, MessageSquare, Check } from "@lucide/astro";
+import { Phone, MessageSquare } from "@lucide/astro";
 import heroImage from "~/assets/hero-lawn.jpg";
 import { PHONE_DISPLAY, TEL_HREF, SMS_HREF } from "~/lib/site-meta";
 
-const proofPoints = ["Free estimates", "No contracts", "We haul it all off"];
+const stats = [
+  { value: "12", accent: "", label: "Services, one crew" },
+  { value: "3", accent: " Counties", label: "Jackson, Calhoun & Liberty" },
+  { value: "100%", accent: " Local", label: "Family-run out of Marianna" },
+  { value: "0", accent: " Contracts", label: "Cancel any time" },
+];
 ---
 
-<section class="border-b border-rule">
- <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:py-24">
- <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
- {/* ---- Statement ---- */}
- <div class="lg:col-span-6">
- <p class="pill">Serving Jackson, Calhoun &amp; Liberty counties</p>
+<section class="hero-ground relative isolate overflow-hidden">
+  {/* The photograph, under the gradient. */}
+  <div class="absolute inset-0 -z-10" aria-hidden="true">
+    <Image
+      src={heroImage}
+      alt=""
+      widths={[640, 960, 1280, 1600, 1920]}
+      sizes="100vw"
+      width={1920}
+      height={1080}
+      quality={58}
+      loading="eager"
+      fetchpriority="high"
+      class="hero-photo h-full w-full object-cover"
+    />
+  </div>
 
- <h1 class="animate-rise mt-5 text-[2.6rem] text-ink sm:text-6xl">
- Your yard, <span class="text-field">handled.</span>
- </h1>
+  <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:py-28">
+    <p class="eyebrow-pill">
+      <span class="animate-dot h-2 w-2 rounded-full bg-gold" aria-hidden="true"></span>
+      Serving the Panhandle since 2021
+    </p>
 
- <p class="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
- Mowing, landscaping, tree work, pressure washing, and junk hauling —
- one crew for the whole property. We show up when we say we will, and
- nothing gets left at the curb.
- </p>
+    <h1
+      class="animate-rise mt-7 max-w-4xl text-[2.9rem] leading-[1.02] text-white sm:text-6xl lg:text-7xl"
+    >
+      Full service lawn care
+      <span class="block text-gold">&amp; junk removal</span>
+    </h1>
 
- <ul class="mt-7 flex flex-wrap gap-x-6 gap-y-2.5">
- {
- proofPoints.map((point) => (
- <li class="flex items-center gap-2 text-sm font-bold text-field-deep">
- <Check class="h-4.5 w-4.5 shrink-0 text-field-bright" aria-hidden="true" />
- {point}
- </li>
- ))
- }
- </ul>
+    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-on-dark-soft sm:text-xl">
+      Mowing, landscaping, tree work, pressure washing and hauling across
+      Jackson, Calhoun and Liberty counties — done and cleaned up by one local
+      crew. We show up when we say we will.
+    </p>
 
- <div class="mt-9 flex flex-col gap-3 sm:flex-row">
- <a
- href={TEL_HREF}
- data-track="hero-call"
- class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-field px-7 py-4 text-base font-extrabold text-white transition-colors hover:bg-field-deep"
- >
- <Phone class="h-5 w-5" aria-hidden="true" />
- Call {PHONE_DISPLAY}
- </a>
- <a
- href={SMS_HREF}
- data-track="hero-text"
- class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-paper-sunk px-7 py-4 text-base font-extrabold text-field-deep transition-colors hover:bg-field-wash"
- >
- <MessageSquare class="h-5 w-5" aria-hidden="true" />
- Text us a photo
- </a>
- </div>
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+      <a
+        href="/contact"
+        data-track="hero-estimate"
+        class="btn btn-gold text-base hover:btn-gold-hover"
+      >
+        Get a free estimate
+      </a>
+      <a href={TEL_HREF} data-track="hero-call" class="btn btn-ghost-dark text-base">
+        <Phone class="h-5 w-5" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+      <a
+        href={SMS_HREF}
+        data-track="hero-text"
+        class="btn btn-ghost-dark text-base sm:hidden"
+      >
+        <MessageSquare class="h-5 w-5" aria-hidden="true" />
+        Text us a photo
+      </a>
+    </div>
 
- <p class="mt-5 text-sm text-ink-soft">
- Or <a
- href="/contact"
- class="font-bold text-field underline underline-offset-2">request an estimate online</a
- > — we usually reply the same day.
- </p>
- </div>
-
- {/* ---- The photograph ---- */}
- <div class="lg:col-span-6" data-reveal="right">
- {/*
- width/height are explicit on purpose: without them Astro points the
- `src` fallback at the full 3051px original — a ~900kB LCP image for
- any client that ignores srcset. They also fix the intrinsic aspect
- ratio, so this contributes no CLS.
- */}
- <Image
- src={heroImage}
- alt="A wide Jackson County property freshly cut by Faith Lawn Care, with clean mowing stripes running the length of the yard toward the treeline"
- widths={[640, 960, 1280, 1600]}
- sizes="(min-width: 1024px) 50vw, 92vw"
- width={1600}
- height={900}
- quality={68}
- loading="eager"
- fetchpriority="high"
- class="w-full rounded-lg object-cover"
- />
- </div>
- </div>
- </div>
+    {/* Stat row */}
+    <dl
+      class="mt-14 grid gap-8 border-t border-white/15 pt-9 sm:grid-cols-2 lg:grid-cols-4"
+      data-reveal-group
+      data-reveal-stagger="80"
+    >
+      {
+        stats.map((stat) => (
+          <div data-reveal="fade">
+            <dt class="font-display text-3xl text-gold sm:text-4xl">
+              {stat.value}
+              {stat.accent && <span class="text-white">{stat.accent}</span>}
+            </dt>
+            <dd class="mt-1.5 text-sm text-on-dark-soft">{stat.label}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
 </section>

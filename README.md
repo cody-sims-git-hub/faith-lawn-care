@@ -15,7 +15,7 @@ Built from the [`sdp-starter-kit`](https://github.com/cody-sims-git-hub/sdp-star
 | --- | --- |
 | Framework | **Astro** — static output (SSG) |
 | Styling | **Tailwind CSS 4** via `@tailwindcss/vite`; tokens in `src/styles/global.css` |
-| Design | **"Fresh & Bright"** — white ground, Figtree, vivid grass green, soft radii |
+| Design | Modelled on mysecurtek.com, in forest green + gold |
 | Interactivity | **Alpine.js** — menus, the coverage map selection, the quote form |
 | Icons | **`@lucide/astro`** (the maintained successor to `lucide-astro`) |
 | Hosting | **Cloudflare Pages** |
@@ -156,6 +156,9 @@ Things that will look like mistakes and are not:
   it and documents that it is not pinnable; a hash there breaks the CAPTCHA.
 - Scroll reveal is gated behind `html.js`, so with JavaScript off — and for
   crawlers — every element renders fully visible.
-- `--field-bright` is never used for text. It is the vivid accent from the
-  chosen design, and white on it measures 3.43:1 — a clear AA failure. Anything
-  carrying words uses `--field` (5.06:1 both ways on white).
+- `--grass-lit` and `--gold` are never used for text on white — 3.4:1 and
+  1.9:1 respectively. Text uses `--grass`, `--forest`, or `--gold-ink`.
+- The quote popup posts to the same `/api/quote` endpoint as the full form, so
+  there is one lead path and one place delivery can break. It shows once, skips
+  `/contact`, skips visitors who have already scrolled, and remembers dismissal
+  in localStorage.

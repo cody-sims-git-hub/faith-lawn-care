@@ -13,7 +13,7 @@ const { service } = Astro.props;
  href={`/services/${service.slug}`}
  data-reveal
  
- class=" card group relative flex flex-col overflow-hidden rounded-md p-6 hover:border-field"
+ class=" card group relative flex flex-col overflow-hidden rounded-md p-6 hover:border-grass"
 >
  {/* Pointer-tracked sheen. Sits under the content, above the card fill. */}
  <span
@@ -22,7 +22,7 @@ const { service } = Astro.props;
 
  <span class="relative flex flex-1 flex-col">
  <span
- class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-sm bg-field-wash text-field-bright"
+ class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-sm bg-paper-sunk text-grass-lit"
  >
  <ServiceIcon name={service.icon} class="h-6 w-6" />
  </span>
@@ -36,7 +36,7 @@ const { service } = Astro.props;
  </p>
 
  <span
- class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-field"
+ class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-grass"
  >
  Learn more
  <ArrowRight

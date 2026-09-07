@@ -32,7 +32,7 @@ const coreAreas = areasByTier("core");
  <a
  href={TEL_HREF}
  data-track="footer-call"
- class="inline-flex items-center gap-2 rounded-sm bg-field px-4 py-2.5 text-sm font-bold text-white"
+ class="inline-flex items-center gap-2 rounded-sm bg-forest px-4 py-2.5 text-sm font-bold text-white"
  >
  <Phone class="h-4 w-4" aria-hidden="true" />
  Call
@@ -40,7 +40,7 @@ const coreAreas = areasByTier("core");
  <a
  href={SMS_HREF}
  data-track="footer-text"
- class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-field"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-grass"
  >
  <MessageSquare class="h-4 w-4" aria-hidden="true" />
  Text
@@ -49,7 +49,7 @@ const coreAreas = areasByTier("core");
  href={FACEBOOK_URL}
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-field"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-grass"
  >
  <FacebookIcon class="h-4 w-4" />
  Facebook
@@ -58,7 +58,7 @@ const coreAreas = areasByTier("core");
  </div>
 
  <div>
- <h2 class="text-sm font-bold uppercase tracking-widest text-field">Services</h2>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Services</h2>
  <ul class="mt-4 space-y-2">
  {
  services.map((s) => (
@@ -76,7 +76,7 @@ const coreAreas = areasByTier("core");
  </div>
 
  <div>
- <h2 class="text-sm font-bold uppercase tracking-widest text-field">Service Areas</h2>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Service Areas</h2>
  <ul class="mt-4 space-y-2">
  {
  coreAreas.slice(0, 8).map((a) => (
@@ -86,7 +86,7 @@ const coreAreas = areasByTier("core");
  <li>
  <a
  href="/service-areas"
- class="text-sm font-semibold text-field hover:underline"
+ class="text-sm font-semibold text-grass hover:underline"
  >
  See the full coverage map →
  </a>
@@ -95,12 +95,12 @@ const coreAreas = areasByTier("core");
  </div>
 
  <div>
- <h2 class="text-sm font-bold uppercase tracking-widest text-field">Hours</h2>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Hours</h2>
  <ul class="mt-4 space-y-2">
  {
  HOURS.map((h) => (
  <li class="flex items-start gap-2 text-sm text-ink-soft">
- <Clock class="mt-0.5 h-4 w-4 shrink-0 text-field" aria-hidden="true" />
+ <Clock class="mt-0.5 h-4 w-4 shrink-0 text-grass" aria-hidden="true" />
  <span>
  <span class="text-ink">{h.days}</span>
  <br />
@@ -110,7 +110,7 @@ const coreAreas = areasByTier("core");
  ))
  }
  <li class="flex items-start gap-2 pt-1 text-sm text-ink-soft">
- <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-field" aria-hidden="true" />
+ <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-grass" aria-hidden="true" />
  <span>Based in {BASE_CITY}, {BASE_STATE_CODE} — we come to you</span>
  </li>
  </ul>
@@ -124,7 +124,7 @@ const coreAreas = areasByTier("core");
  <p>© {year} {LEGAL_NAME}. All rights reserved.</p>
  <p class="flex items-center gap-4">
  <a href="/privacy" class="hover:text-ink">Privacy</a>
- <a href={TEL_HREF} class="font-semibold text-field">{PHONE_DISPLAY}</a>
+ <a href={TEL_HREF} class="font-semibold text-grass">{PHONE_DISPLAY}</a>
  </p>
  </div>
  </div>

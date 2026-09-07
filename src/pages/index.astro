@@ -62,10 +62,10 @@ const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
  <div class="mt-10" data-reveal>
  <a
  href="/services"
- class="inline-flex items-center gap-2 rounded-sm border border-rule px-6 py-3.5 text-base font-bold text-ink transition-colors hover:border-field"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-6 py-3.5 text-base font-bold text-ink transition-colors hover:border-grass"
  >
  See all twelve services
- <ArrowRight class="h-4 w-4 text-field" aria-hidden="true" />
+ <ArrowRight class="h-4 w-4 text-grass" aria-hidden="true" />
  </a>
  </div>
  </Section>
@@ -85,13 +85,13 @@ const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
  steps.map((step, i) => (
  <li class="flex gap-5" data-reveal>
  <span
- class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-field-wash text-field-bright"
+ class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-paper-sunk text-grass-lit"
  >
  <step.icon class="h-6 w-6" aria-hidden="true" />
  </span>
  <div>
  <h3 class="text-lg font-bold text-ink">
- <span class="mr-2 text-field">{i + 1}.</span>
+ <span class="mr-2 text-grass">{i + 1}.</span>
  {step.title}
  </h3>
  <p class="mt-1.5 text-base leading-relaxed text-ink-soft">

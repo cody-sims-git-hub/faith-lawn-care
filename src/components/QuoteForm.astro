@@ -54,7 +54,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  <template x-if="status === 'sent'">
  <div class="py-8 text-center">
  <span
- class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-field-wash text-field-bright"
+ class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-paper-sunk text-grass-lit"
  >
  <Check class="h-7 w-7" aria-hidden="true" />
  </span>
@@ -67,7 +67,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  </p>
  <a
  href={TEL_HREF}
- class="mt-6 inline-flex items-center gap-2 rounded-sm bg-field px-5 py-3 text-sm font-bold text-white"
+ class="mt-6 inline-flex items-center gap-2 rounded-sm bg-forest px-5 py-3 text-sm font-bold text-white"
  >
  <Phone class="h-4 w-4" aria-hidden="true" />
  {PHONE_DISPLAY}
@@ -79,7 +79,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  <div class="grid gap-5 sm:grid-cols-2">
  <div class="sm:col-span-1">
  <label for="name" class="mb-1.5 block text-sm font-semibold text-ink">
- Your name <span class="text-field">*</span>
+ Your name <span class="text-grass">*</span>
  </label>
  <input
  id="name"
@@ -87,14 +87,14 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  type="text"
  required
  autocomplete="name"
- class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-field focus:outline-none"
+ class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-grass focus:outline-none"
  placeholder="Jane Smith"
  />
  </div>
 
  <div class="sm:col-span-1">
  <label for="phone" class="mb-1.5 block text-sm font-semibold text-ink">
- Phone <span class="text-field">*</span>
+ Phone <span class="text-grass">*</span>
  </label>
  <input
  id="phone"
@@ -103,7 +103,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  required
  autocomplete="tel"
  inputmode="tel"
- class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-field focus:outline-none"
+ class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-grass focus:outline-none"
  placeholder="850-000-0000"
  />
  </div>
@@ -117,14 +117,14 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  name="email"
  type="email"
  autocomplete="email"
- class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-field focus:outline-none"
+ class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-grass focus:outline-none"
  placeholder="you@example.com"
  />
  </div>
 
  <div class="sm:col-span-1">
  <label for="town" class="mb-1.5 block text-sm font-semibold text-ink">
- Town <span class="text-field">*</span>
+ Town <span class="text-grass">*</span>
  </label>
  <input
  id="town"
@@ -132,7 +132,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  type="text"
  required
  autocomplete="address-level2"
- class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-field focus:outline-none"
+ class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-grass focus:outline-none"
  placeholder="Marianna"
  />
  </div>
@@ -144,7 +144,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  <select
  id="service"
  name="service"
- class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink focus:border-field focus:outline-none"
+ class="w-full rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink focus:border-grass focus:outline-none"
  >
  <option value="">Not sure yet — help me figure it out</option>
  {services.map((s) => <option value={s.name}>{s.name}</option>)}
@@ -159,7 +159,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  id="details"
  name="details"
  rows="4"
- class="w-full resize-y rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-field focus:outline-none"
+ class="w-full resize-y rounded-sm border border-rule-strong bg-paper/60 px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-grass focus:outline-none"
  placeholder="Roughly how big is the yard? Anything we should know before we come look?"
  ></textarea>
  </div>
@@ -185,7 +185,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  <button
  type="submit"
  x-bind:disabled="status === 'sending'"
- class="mt-6 flex w-full items-center justify-center gap-2 rounded-sm bg-field px-6 py-4 text-base font-bold text-white transition-colors hover:bg-field-deep disabled:opacity-60"
+ class="mt-6 flex w-full items-center justify-center gap-2 rounded-sm bg-forest px-6 py-4 text-base font-bold text-white transition-colors hover:bg-forest-deep disabled:opacity-60"
  >
  <template x-if="status === 'sending'">
  <LoaderCircle class="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -205,7 +205,7 @@ const { endpoint, turnstileSiteKey } = contactConfig;
  <span>
  <span x-text="error"></span>
  {" "}You can always reach us directly at
- <a href={TEL_HREF} class="font-bold text-field underline">{PHONE_DISPLAY}</a>.
+ <a href={TEL_HREF} class="font-bold text-grass underline">{PHONE_DISPLAY}</a>.
  </span>
  </div>
 

@@ -10,17 +10,26 @@ this file is only the things that bite.
 - **Cloudflare Pages**, not Hostinger. This is a deliberate deviation from the
   starter kit's SFTP default; host rules live in `public/_headers` and
   `public/_redirects`. There is no `.htaccess` and adding one does nothing.
-- **"Fresh & Bright" palette**, chosen by the client from four mocked
-  directions. White ground, Figtree at two weights, vivid grass green, soft
-  radii. Tokens live once in `src/styles/global.css` on `:root`; there is no
-  dark variant and no `dark:` scheme.
+- **Modelled on mysecurtek.com**, at the client's direction: dark utility
+  bar, white sticky header with a scroll-progress line, dark gradient hero over
+  a dimmed photo, pill eyebrow with a live dot, two-tone headline, pill
+  buttons, a stat row, gold dash eyebrows on light sections. Translated from
+  that site's navy to this business's forest green.
 
-  **The colour rule that matters:** `--field` (#1B7F3D) is the only green that
-  carries TEXT — 5.06:1 on white, and white on it is also 5.06:1, so one value
-  serves as link colour, heading accent, and filled button.
-  `--field-bright` (#2E9E4F) is a FILL/mark colour only: icons, checks,
-  swatches, borders. White on it is 3.43:1 and fails AA. If you are about to
-  put words on `--field-bright`, you want `--field`.
+  **The colour rules that matter** (all in `src/styles/global.css`):
+
+  | Token | Value | Use |
+  | --- | --- | --- |
+  | `--forest` | #0d3b1e | hero ground; headings on white (12.2:1) |
+  | `--grass` | #1b7f3d | links/buttons on white (5.06:1 both ways) |
+  | `--grass-lit` | #2e9e4f | FILL/mark only — 3.4:1, never carries text |
+  | `--gold` | #e6b23c | DARK grounds only (6.5:1 on forest) and fills |
+  | `--gold-ink` | #8a6a16 | the gold voice on LIGHT grounds (5.0:1 on white) |
+
+  Two gold tokens is not redundancy. The bright gold is 1.9:1 on white and is
+  effectively invisible as text there — the reference site actually ships that
+  bug, and we copy the look, not the contrast failure. Gold fills also take
+  `--forest-deep` labels, never white: white on gold is 2.1:1.
 - **Email-only lead capture.** Nothing is stored. Do not add a database, KV,
   D1, or a lead table — the client explicitly does not want stored leads.
 - **The map is inline SVG over real Census geometry.** Not Three.js, not a map
