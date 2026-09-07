@@ -2,159 +2,251 @@
 import Layout from "~/layouts/Layout.astro";
 import PageHeader from "~/components/PageHeader.astro";
 import Section from "~/components/Section.astro";
+import SectionHeading from "~/components/SectionHeading.astro";
 import ServiceCard from "~/components/ServiceCard.astro";
 import FaqList from "~/components/FaqList.astro";
 import CtaBand from "~/components/CtaBand.astro";
-import { Clock, MapPin } from "@lucide/astro";
-import { areasWithPages, tierLabels, tierBlurbs, type Area, hub } from "~/lib/areas";
+import { Phone, MessageSquare, MapPin, Clock, Check, ArrowRight } from "@lucide/astro";
+import { areasWithPages, tierLabels, tierBlurbs, getArea, hasAreaPage, type Area } from "~/lib/areas";
+import { getAreaContent } from "~/lib/area-content";
 import { services, featuredServices } from "~/lib/services";
-import { localBusiness, breadcrumbs, serviceCatalog } from "~/lib/structured-data";
-import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+import { faqs as globalFaqs } from "~/lib/faq";
+import { localBusiness, breadcrumbs, serviceCatalog, faqPage } from "~/lib/structured-data";
+import { PHONE_DISPLAY, TEL_HREF, SMS_HREF } from "~/lib/site-meta";
 
-// Only towns with genuinely distinct local content get a page. A page per town
-// built from the same template with the name swapped is a doorway page, and
-// Google treats a cluster of them as exactly that.
+// A town gets a page only if it has rich, town-specific content in
+// area-content.ts. Templating a page per town from one shell with the name
+// swapped is a doorway-page cluster; these are not that.
 export function getStaticPaths() {
- return areasWithPages.map((area) => ({
- params: { slug: area.slug },
- props: { area },
- }));
+  return areasWithPages.map((area) => ({ params: { slug: area.slug }, props: { area } }));
 }
 
 interface Props {
- area: Area;
+  area: Area;
 }
 const { area } = Astro.props;
+const content = getAreaContent(area.slug)!;
+
+// Town FAQ = the town-specific questions, plus two universal ones people always
+// ask, so every town page still answers "insured?" and "one-time jobs?".
+const universal = globalFaqs.filter((f) =>
+  /insured|one-time/i.test(f.q),
+);
+const townFaqs = [...content.faqs, ...universal.map((f) => ({ q: f.q, a: f.a }))];
+
+// Only link to towns that actually have a page — a nearby slug pointing at a
+// town without content would build a dead internal link (the SEO audit fails
+// the build on exactly that).
+const nearby = content.nearby
+  .filter((slug) => hasAreaPage(slug))
+  .map((slug) => getArea(slug))
+  .filter((a): a is Area => Boolean(a));
 
 const jsonLd = [
- localBusiness(),
- serviceCatalog(services),
- breadcrumbs([
- { name: "Home", path: "/" },
- { name: "Service Areas", path: "/service-areas" },
- { name: area.name, path: `/service-areas/${area.slug}` },
- ]),
+  localBusiness(),
+  serviceCatalog(services),
+  faqPage(townFaqs),
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Service Areas", path: "/service-areas" },
+    { name: area.name, path: `/service-areas/${area.slug}` },
+  ]),
 ];
 ---
 
 <Layout
- title={`Lawn Care in ${area.name}, ${area.state} | Faith Lawn Care`}
- description={`Lawn mowing, landscaping, tree work, pressure washing, and junk removal in ${area.name}, ${area.county}. Free estimates — call or text ${PHONE_DISPLAY}.`}
- path={`/service-areas/${area.slug}`}
- jsonLd={jsonLd}
+  title={`Lawn Care in ${area.name}, ${area.state} | Faith Lawn Care`}
+  description={`Lawn care, tree work, and junk removal in ${area.name}, ${area.county}. Free estimates, no contracts — call or text ${PHONE_DISPLAY}.`}
+  path={`/service-areas/${area.slug}`}
+  jsonLd={jsonLd}
 >
- <PageHeader
- eyebrow={area.county}
- title={`Lawn Care in ${area.name}`}
- trail={[{ name: "Service Areas", path: "/service-areas" }]}
- >
- {
- area.slug === hub.slug ? (
- <>
- Home base. Full-service lawn care, landscaping, and junk removal across
- {" "}{area.name} and the rest of {area.county} — this is where we are most
- days.
- </>
- ) : (
- <>
- Full-service lawn care, landscaping, and junk removal for {area.name} and
- the surrounding area — the same crew and the same standard we run at home
- in Marianna.
- </>
- )
- }
- </PageHeader>
+  <PageHeader
+    eyebrow={`${area.county} · ${area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} min from Marianna`}`}
+    title={`Lawn Care & Junk Removal in ${area.name}`}
+    trail={[{ name: "Service Areas", path: "/service-areas" }]}
+  >
+    {content.tagline}
+  </PageHeader>
 
- <Section>
- <div class="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
- <div>
- <h2 class="font-display text-2xl text-ink" data-reveal>
- What we see in {area.name}
- </h2>
- <div class="mt-6 space-y-5" data-reveal-group>
- {
- area.localNote?.map((paragraph) => (
- <p class="text-lg leading-relaxed text-ink-soft" data-reveal="fade">
- {paragraph}
- </p>
- ))
- }
- </div>
- </div>
+  {/* ---- Narrative + coverage card ---- */}
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-[1.55fr_1fr] lg:gap-16">
+      <div>
+        <h2 class="font-display text-3xl text-forest" data-reveal>
+          Lawn care in {area.name}, done by people who actually work here
+        </h2>
+        <div class="mt-6 space-y-5" data-reveal-group>
+          {
+            content.intro.map((paragraph) => (
+              <p class="text-lg leading-relaxed text-ink-soft" data-reveal="fade">
+                {paragraph}
+              </p>
+            ))
+          }
+        </div>
 
- <aside class="lg:sticky lg:top-24 lg:self-start">
- <div class="card rounded-md p-6" data-reveal="right">
- <h2 class="font-display text-xl text-ink">
- Coverage
- </h2>
+        <div class="mt-8" data-reveal>
+          <p class="label-caps text-gold-ink">Around {area.name} we cover</p>
+          <ul class="mt-3 flex flex-wrap gap-2">
+            {
+              content.landmarks.map((place) => (
+                <li class="inline-flex items-center gap-1.5 rounded-full border border-rule bg-paper-sunk px-3 py-1.5 text-sm text-ink-soft">
+                  <MapPin class="h-3.5 w-3.5 text-grass" aria-hidden="true" />
+                  {place}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
 
- <dl class="mt-5 space-y-4">
- <div class="flex items-start gap-3">
- <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
- <div>
- <dt class="text-xs font-semibold uppercase tracking-wider text-ink-soft">
- County
- </dt>
- <dd class="text-base font-bold text-ink">{area.county}</dd>
- </div>
- </div>
- <div class="flex items-start gap-3">
- <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
- <div>
- <dt class="text-xs font-semibold uppercase tracking-wider text-ink-soft">
- From Marianna
- </dt>
- <dd class="text-base font-bold text-ink">
- {area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} minutes`}
- </dd>
- </div>
- </div>
- </dl>
+      {/* Coverage / booking card */}
+      <aside class="lg:sticky lg:top-28 lg:self-start">
+        <div class="card-filed p-6" data-reveal="right">
+          <p class="label-caps text-gold-ink">Coverage</p>
+          <h2 class="mt-2 font-display text-2xl text-forest">{area.name}, {area.state}</h2>
 
- <p class="mt-5 border-t border-rule pt-5 text-sm leading-relaxed text-ink-soft">
- {tierBlurbs[area.tier]}
- </p>
+          <dl class="mt-5 space-y-4 border-t border-rule pt-5">
+            <div class="flex items-start gap-3">
+              <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+              <div>
+                <dt class="label-caps text-ink-faint">County</dt>
+                <dd class="mt-0.5 text-base font-bold text-ink">{area.county}</dd>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+              <div>
+                <dt class="label-caps text-ink-faint">From Marianna</dt>
+                <dd class="mt-0.5 text-base font-bold text-ink">
+                  {area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} minutes`}
+                </dd>
+              </div>
+            </div>
+          </dl>
 
- <a
- href={TEL_HREF}
- data-track="area-call"
- class="mt-6 flex items-center justify-center gap-2 rounded-sm bg-forest px-5 py-3.5 text-base font-bold text-white"
- >
- Call {PHONE_DISPLAY}
- </a>
- </div>
- </aside>
- </div>
- </Section>
+          <p class="mt-5 border-t border-rule pt-5 text-sm leading-relaxed text-ink-soft">
+            {tierBlurbs[area.tier]}
+          </p>
 
- <Section band>
- <h2 class="font-display text-3xl text-ink" data-reveal>
- Popular in {area.name}
- </h2>
- <p class="mt-3 max-w-2xl text-lg text-ink-soft" data-reveal>
- All twelve services are available here. These are the ones we get called
- for most.
- </p>
- <div
- class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
- data-reveal-group
- data-reveal-stagger="70"
- >
- {featuredServices.map((service) => <ServiceCard service={service} />)}
- </div>
- </Section>
+          <div class="mt-6 flex flex-col gap-2.5">
+            <a href={TEL_HREF} data-track="area-call" class="btn btn-gold w-full text-sm hover:btn-gold-hover">
+              <Phone class="h-4 w-4" aria-hidden="true" />
+              Call {PHONE_DISPLAY}
+            </a>
+            <a href={SMS_HREF} data-track="area-text" class="btn btn-outline w-full text-sm">
+              <MessageSquare class="h-4 w-4" aria-hidden="true" />
+              Text us a photo
+            </a>
+          </div>
+          <p class="mt-3 text-center text-xs text-ink-faint">
+            Free estimate · no contracts · usually same-day reply
+          </p>
+        </div>
+      </aside>
+    </div>
+  </Section>
 
- <Section>
- <h2 class="font-display text-3xl text-ink" data-reveal>
- Common questions
- </h2>
- <div class="mt-8 max-w-3xl">
- <FaqList limit={5} />
- </div>
- </Section>
+  {/* ---- Why us, framed for this town ---- */}
+  <Section band size="sm">
+    <SectionHeading eyebrow={`Why ${area.name} calls us`} title={`One local crew for the whole property`}>
+      No national call center, no subcontractors marked up — just a Marianna crew
+      that treats {area.name} like part of the route it is.
+    </SectionHeading>
+    <div class="mt-10 grid gap-5 md:grid-cols-3" data-reveal-group data-reveal-stagger="80">
+      {
+        content.highlights.map((h) => (
+          <div class="card p-6" data-reveal>
+            <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-paper-sunk text-grass-lit">
+              <Check class="h-5 w-5" aria-hidden="true" />
+            </span>
+            <h3 class="mt-4 font-display text-lg text-forest">{h.title}</h3>
+            <p class="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">{h.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
 
- <CtaBand
- title={`Serving ${area.name} — ${tierLabels[area.tier]}`}
- body="Call or text and we will come look at the property. Free estimate, firm price, no obligation."
- />
+  {/* ---- Services ---- */}
+  <Section>
+    <SectionHeading eyebrow="What we do here" title={`Services in ${area.name}`}>
+      All twelve services are available in {area.name} — these are the ones we get
+      called for most. Mowing keeps a yard sharp; the junk and tree work is what
+      most of our neighbors are surprised we also handle.
+    </SectionHeading>
+    <div
+      class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+      data-reveal-group
+      data-reveal-stagger="70"
+    >
+      {featuredServices.map((service) => <ServiceCard service={service} />)}
+    </div>
+    <div class="mt-8" data-reveal>
+      <a
+        href="/services"
+        class="inline-flex items-center gap-1.5 text-base font-bold text-grass hover:underline"
+      >
+        See all twelve services
+        <ArrowRight class="h-4 w-4" aria-hidden="true" />
+      </a>
+    </div>
+  </Section>
+
+  {/* ---- FAQ, town-flavoured ---- */}
+  <Section band>
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div class="lg:sticky lg:top-28 lg:self-start">
+        <SectionHeading eyebrow="Questions" title={`Lawn care in ${area.name} — the common questions`}>
+          Straight answers for {area.name}. If yours isn't here, call or text and
+          we'll tell you now rather than surprise you later.
+        </SectionHeading>
+        <div class="card mt-8 p-6" data-reveal>
+          <p class="font-display text-lg text-forest">Serving {area.name}, {area.state}</p>
+          <p class="mt-2 text-sm leading-relaxed text-ink-soft">{tierBlurbs[area.tier]}</p>
+          <a href={TEL_HREF} class="btn btn-gold mt-5 w-full py-3 text-sm hover:btn-gold-hover">
+            <Phone class="h-4 w-4" aria-hidden="true" />
+            {PHONE_DISPLAY}
+          </a>
+        </div>
+      </div>
+      <div>
+        <FaqList items={townFaqs} />
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- Nearby internal links ---- */}
+  {
+    nearby.length > 0 && (
+      <Section size="sm">
+        <h2 class="font-display text-2xl text-forest" data-reveal>
+          We also cover nearby
+        </h2>
+        <div class="mt-6 grid gap-4 sm:grid-cols-3" data-reveal-group>
+          {nearby.map((n) => (
+            <a
+              href={`/service-areas/${n.slug}`}
+              class="card group flex items-center justify-between gap-3 p-5 transition-colors hover:border-grass"
+              data-reveal
+            >
+              <span>
+                <span class="block font-display text-lg text-forest">{n.name}</span>
+                <span class="text-sm text-ink-soft">{n.county}</span>
+              </span>
+              <ArrowRight
+                class="h-4 w-4 shrink-0 text-grass transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </a>
+          ))}
+        </div>
+      </Section>
+    )
+  }
+
+  <CtaBand
+    title={`Need lawn care or hauling in ${area.name}?`}
+    body="Call or text and tell us what the property needs. We'll come look, give you a firm price, and you decide from there — free estimate, no obligation."
+  />
 </Layout>

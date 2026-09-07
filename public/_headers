@@ -13,9 +13,23 @@
   # are served over TLS through Cloudflare.
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   # CSP notes:
-  #   'unsafe-inline' on script-src is required by Astro's inline hydration
-  #     bootstrap and the is:inline scripts in Layout.astro.
+  #   'unsafe-eval' is REQUIRED by Alpine.js. Alpine compiles every directive
+  #     (x-on, x-show, x-bind, x-text, x-data) with `new Function(...)`, which
+  #     CSP classes as eval. Without it, Alpine loads, strips x-cloak, and then
+  #     silently fails to wire up ANY behaviour — the mobile menu will not open,
+  #     the quote popup will not close, and the coverage map is inert. This is
+  #     invisible in `astro preview`, which does not apply _headers, so it only
+  #     shows up in production. Alpine's CSP-safe build would remove this need
+  #     but forbids the inline expressions the coverage map relies on
+  #     (x-bind:fill-opacity with a ternary), so it is not an option here. The
+  #     residual risk is low: nothing user-supplied is ever evaluated — Alpine
+  #     only evaluates the directive strings baked into the HTML at build time,
+  #     and the script-src allowlist still blocks injected external scripts.
+  #   'unsafe-inline' on script-src covers Astro's inline hydration bootstrap
+  #     and the is:inline scripts in Layout.astro.
   #   challenges.cloudflare.com is Turnstile (script + iframe).
+  #   static.cloudflareinsights.com is Cloudflare Web Analytics (auto-injected
+  #     by Pages); cloudflareinsights.com receives its beacon.
   #   fonts.googleapis.com / fonts.gstatic.com serve the web font.
   #   googletagmanager.com loads gtag.js; google-analytics.com and its
   #     subdomains receive the beacons. BOTH the script-src and the connect-src
@@ -24,7 +38,7 @@
   #     "analytics installed and reporting nothing".
   #   'unsafe-inline' on style-src covers the inline style attributes used by
   #     the coverage map and the scroll-progress bar.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-src https://challenges.cloudflare.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.googletagmanager.com https://*.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
 
 # Astro fingerprints everything under _astro/, so it can be cached forever.
 /_astro/*
