@@ -1,0 +1,144 @@
+---
+/**
+ * Sticky white header with a scroll-progress line along its bottom edge —
+ * both taken from the reference site.
+ *
+ * The progress line is driven by a scroll listener that only writes one CSS
+ * custom property and never reads layout during the scroll, so it cannot cause
+ * scroll-linked thrash. It is decorative and aria-hidden.
+ */
+import { Phone, Menu, X } from "@lucide/astro";
+import Logo from "./Logo.astro";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+
+const nav = [
+  { label: "Services", href: "/services" },
+  { label: "Service Areas", href: "/service-areas" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+];
+
+// Astro.url.pathname carries no trailing slash (trailingSlash: 'never').
+const current = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === "/" ? current === "/" : current === href || current.startsWith(`${href}/`);
+---
+
+<header class="sticky top-0 z-50 border-b border-rule bg-paper" x-data="{ open: false }">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <a href="/" class="shrink-0" aria-label="Faith Lawn Care — home">
+      <Logo compact />
+    </a>
+
+    <nav class="hidden items-center gap-1 lg:flex" aria-label="Main">
+      {
+        nav.map((item) => (
+          <a
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+            class:list={[
+              "rounded-full px-3.5 py-2 text-sm font-bold transition-colors",
+              isActive(item.href)
+                ? "bg-paper-sunk text-forest"
+                : "text-ink-soft hover:text-forest",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href={TEL_HREF}
+        data-track="header-call"
+        class="btn btn-gold hidden px-5 py-3 text-sm hover:btn-gold-hover sm:inline-flex"
+      >
+        <Phone class="h-4 w-4" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+
+      <button
+        type="button"
+        class="inline-flex items-center justify-center rounded-full border border-rule-strong p-2.5 text-forest lg:hidden"
+        x-on:click="open = !open"
+        x-bind:aria-expanded="open ? 'true' : 'false'"
+        aria-controls="mobile-nav"
+        aria-label="Toggle menu"
+      >
+        <X class="h-5 w-5" x-show="open" x-cloak aria-hidden="true" />
+        <Menu class="h-5 w-5" x-show="!open" aria-hidden="true" />
+      </button>
+    </div>
+  </div>
+
+  {/* Scroll progress */}
+  <div
+    class="absolute inset-x-0 bottom-0 h-0.5 origin-left bg-gold"
+    style="transform: scaleX(var(--scroll-progress, 0));"
+    aria-hidden="true"
+    data-scroll-progress
+  >
+  </div>
+
+  <div
+    id="mobile-nav"
+    class="border-t border-rule lg:hidden"
+    x-show="open"
+    x-cloak
+    x-transition.origin.top
+  >
+    <nav class="mx-auto max-w-7xl px-4 py-3 sm:px-6" aria-label="Mobile">
+      <ul class="flex flex-col">
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isActive(item.href) ? "page" : undefined}
+                class:list={[
+                  "block rounded-sm px-3 py-3 text-base font-bold",
+                  isActive(item.href) ? "text-forest" : "text-ink-soft",
+                ]}
+                x-on:click="open = false"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a href={TEL_HREF} data-track="mobile-nav-call" class="btn btn-gold mt-2 w-full sm:hidden">
+        <Phone class="h-5 w-5" aria-hidden="true" />
+        Call {PHONE_DISPLAY}
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Scroll progress for the header's bottom rule. Writes one custom property
+  // and never reads layout during the scroll, so it cannot thrash.
+  const bar = document.querySelector<HTMLElement>("[data-scroll-progress]");
+  if (bar && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      bar.style.setProperty("--scroll-progress", String(ratio));
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>

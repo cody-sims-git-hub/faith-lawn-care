@@ -1,0 +1,17 @@
+# Cloudflare Pages redirects. Format: <from> <to> <status>
+#
+# Canonical host is the apex. Cloudflare Pages serves the *.pages.dev preview
+# domain too, and leaving that indexable splits ranking signals between two
+# identical sites — so send www and the pages.dev domain to the apex.
+https://www.faithlawncarellc.com/* https://faithlawncarellc.com/:splat 301!
+
+# Common mistyped / legacy paths, so an old flyer or a guessed URL still lands.
+/services/mowing /services/lawn-mowing 301
+/services/junk /services/junk-removal 301
+/services/trash-removal /services/junk-removal 301
+/areas /service-areas 301
+/service-area /service-areas 301
+/locations /service-areas 301
+/quote /contact 301
+/estimate /contact 301
+/contact-us /contact 301

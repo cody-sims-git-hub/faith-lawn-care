@@ -1,0 +1,72 @@
+name: security
+
+# Enforced security checks for every SDP repo. Canonical copy lives in
+# sdp-starter-kit/templates/ci/security.yml — copy it byte-identically into
+# each repo's .github/workflows/. See engineering/standards/repo-setup.md.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Server-side secret scanning — works on private repos (no GHAS needed).
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so gitleaks scans every commit, not just the tip
+      - name: Install gitleaks
+        run: |
+          VERSION=8.21.2
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+      - name: Scan git history for secrets
+        run: gitleaks git . --redact --verbose --exit-code 1
+
+  # Dependency vulnerability audit — auto-detects manifests, no-ops if none.
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Audit dependencies (composer + npm, auto-detected)
+        run: |
+          set -euo pipefail
+          audited=0
+
+          if [ -f composer.json ]; then
+            audited=1
+            echo "::group::composer audit"
+            docker run --rm -v "$PWD:/app" -w /app composer:2 \
+              audit --locked --abandoned=report --no-interaction
+            echo "::endgroup::"
+          fi
+
+          if [ -f package.json ]; then
+            audited=1
+            echo "::group::npm audit"
+            if [ ! -f package-lock.json ] && [ ! -f npm-shrinkwrap.json ]; then
+              echo "No lockfile — generating an ephemeral one for the audit."
+              npm install --package-lock-only --ignore-scripts
+            fi
+            npm audit --audit-level=high
+            echo "::endgroup::"
+          fi
+
+          if [ "$audited" = "0" ]; then
+            echo "No composer.json or package.json in repo root — nothing to audit."
+          fi

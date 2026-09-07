@@ -1,0 +1,153 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+  pull_request:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "LICENSE"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Gate — runs on PRs AND main pushes. A clean production build is the
+  # deploy-relevant check for an Astro SSG: it fails on template, import, and
+  # type-fatal errors.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+
+      - name: Build (validates the site compiles)
+        run: npm run build
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+
+      # Catches type problems the build tolerates. PR-only for the same reason
+      # as the audit below: a type hint must be able to block a merge but must
+      # never be able to strand production on a stale build.
+      - name: Typecheck the site
+        if: github.event_name == 'pull_request'
+        run: npm run check
+
+      # functions/ is Workers code with its own tsconfig, so it needs its own
+      # pass — `astro check` deliberately excludes it.
+      - name: Typecheck the Pages Function
+        if: github.event_name == 'pull_request'
+        run: npm run check:functions
+
+      # Prove the audit's own rules still fire before trusting its verdict. A
+      # gate that silently finds nothing is worse than no gate at all.
+      - name: SEO audit self-test
+        run: npm run audit:selftest
+
+      # On-page SEO gate over the built HTML. PR-only ON PURPOSE — see above.
+      - name: SEO audit
+        if: github.event_name == 'pull_request'
+        run: npm run audit
+
+      - run: npm audit --omit=dev --audit-level=critical
+
+  # Publish to Cloudflare Pages — main push ONLY, never PRs or other branches.
+  deploy:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://faithlawncarellc.com
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+
+      - name: Build site
+        run: npm run build
+        env:
+          # Public build-time config, baked into the client bundle. A repo
+          # Variable rather than a secret — the Turnstile SITE key is designed
+          # to be public. Its matching SECRET key lives only in the Pages
+          # project environment, never here.
+          PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.PUBLIC_TURNSTILE_SITE_KEY }}
+
+      # Uploads dist/ as the static site plus functions/ as Pages Functions —
+      # wrangler picks up the functions directory from the working directory,
+      # so the quote endpoint ships with the same deploy as the pages.
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=faith-lawn-care --branch=main
+
+  # A failed deploy is otherwise SILENT: the merge still shows green, the site
+  # keeps serving the previous build, and nothing surfaces the gap. Raise it as
+  # a tracked Issue so a stale site is visible on the board rather than being
+  # discovered by accident weeks later.
+  notify-on-failure:
+    needs: [validate, deploy]
+    if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the deploy-failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # The label may not exist yet, and `gh issue create` hard-fails on an
+          # unknown one. Creating it is idempotent; a second run just no-ops.
+          gh label create deploy-failure \
+            --color B60205 \
+            --description "Production deploy failed; the live site is stale" \
+            >/dev/null 2>&1 || true
+
+          cat > "$RUNNER_TEMP/issue-body.md" <<EOF
+          The deploy to Cloudflare Pages failed, so **production is still serving the previous build**.
+
+          - Failed run: $RUN_URL
+          - Commit: \`$COMMIT_SHA\`
+
+          Re-run before digging — most failures here are a transient API blip:
+
+          \`\`\`
+          gh run rerun $RUN_ID --failed
+          \`\`\`
+
+          If a re-run does not fix it, check that \`CLOUDFLARE_API_TOKEN\` has not
+          expired and still carries the **Cloudflare Pages: Edit** permission, and
+          that \`CLOUDFLARE_ACCOUNT_ID\` matches the account owning the Pages project.
+
+          Close this once a deploy succeeds and the live site matches \`main\`.
+          EOF
+
+          # One rolling issue, not one per failed push.
+          existing=$(gh issue list --label deploy-failure --state open \
+                       --limit 1 --json number --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file "$RUNNER_TEMP/issue-body.md"
+            echo "::warning::Deploy failed — commented on existing issue #$existing"
+          else
+            url=$(gh issue create \
+                    --title "Production deploy failed — live site is stale" \
+                    --label deploy-failure \
+                    --body-file "$RUNNER_TEMP/issue-body.md")
+            echo "::warning::Deploy failed — opened $url"
+          fi

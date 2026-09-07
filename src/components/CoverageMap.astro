@@ -1,0 +1,587 @@
+---
+/**
+ * Coverage map — drawn as a land plat.
+ *
+ * The reference is a county plat or a surveyor's parcel drawing: ink linework on
+ * pale stock, tinted by tier, with a scale bar and a north arrow. That is the
+ * right register for a business whose whole question is "which ground do you
+ * cover" — and it is honest, because the shapes are real.
+ *
+ * The boundaries are actual US Census county polygons (src/lib/counties.ts),
+ * projected at build time with an equirectangular projection whose X axis is
+ * scaled by cos(latitude) so the Panhandle is not stretched sideways. Towns sit
+ * at their true WGS84 positions.
+ *
+ * The depth is a paper-layer edge: each county is drawn twice, a darker copy
+ * offset a few pixels below the top face, painted north-to-south so southern
+ * counties occlude their neighbours' edges. It is a cut-paper relief, not a
+ * lit 3D scene — no glow, no gradient, nothing that reads as a screen.
+ *
+ * Accessibility and crawlers: the SVG is aria-hidden and purely visual. The
+ * authoritative content is the grouped town list rendered underneath, which
+ * works with no JavaScript, no pointer, and no colour vision.
+ */
+import { MapPin, Clock, ArrowRight } from "@lucide/astro";
+import { areas, hub, tierLabels, tierBlurbs, type AreaTier } from "~/lib/areas";
+import { counties } from "~/lib/counties";
+
+// ---- Projection ------------------------------------------------------------
+const COS_LAT = Math.cos((30.6 * Math.PI) / 180);
+const projX = (lng: number) => lng * COS_LAT;
+const projY = (lat: number) => -lat; // negate so north is up in SVG's y-down space
+
+const allPoints = counties.flatMap((c) => c.rings.flat());
+const minX = Math.min(...allPoints.map((p) => projX(p[0])));
+const maxX = Math.max(...allPoints.map((p) => projX(p[0])));
+const minY = Math.min(...allPoints.map((p) => projY(p[1])));
+const maxY = Math.max(...allPoints.map((p) => projY(p[1])));
+
+const WIDTH = 1000;
+const PAD_X = 40;
+const PAD_TOP = 52;
+const PAD_BOTTOM = 74;
+const inner = WIDTH - PAD_X * 2;
+const scale = inner / (maxX - minX);
+const HEIGHT = Math.round((maxY - minY) * scale + PAD_TOP + PAD_BOTTOM);
+
+const sx = (lng: number) => PAD_X + (projX(lng) - minX) * scale;
+const sy = (lat: number) => PAD_TOP + (projY(lat) - minY) * scale;
+
+/** Paper-layer edge depth, in projected px. */
+const DEPTH = 7;
+
+// ---- Palette ---------------------------------------------------------------
+// Printer's inks on pale stock. Tiers read by tint, not by brightness, so the
+// map still separates when printed in greyscale or seen with colour blindness —
+// and the town list underneath carries the same information as text regardless.
+const INK = "#16241b";
+const INK_SOFT = "#566a59";
+const PAPER = "#f6f9f5";
+
+// The three covered tiers step down in green saturation. The gap between the
+// palest covered tier and the uncovered stock has to stay obvious — an earlier
+// pass had #dcdfcd against #ddd8ca, which made "we drive here" and "we don't"
+// look identical and quietly destroyed the only thing the map is for.
+const tierFill: Record<AreaTier, string> = {
+ core: "#57bd79",
+ primary: "#a6dcb8",
+ extended: "#d9eede",
+};
+const tierStroke: Record<AreaTier, string> = {
+ core: "#12522b",
+ primary: "#3f9159",
+ extended: "#86b799",
+};
+const tierEdge: Record<AreaTier, string> = {
+ core: "#3f9159",
+ primary: "#7cc194",
+ extended: "#b6dcc4",
+};
+
+// Counties with no town we serve: neutral tan stock with no green in it, so the
+// region's shape reads without implying coverage.
+const CONTEXT_FILL = "#e9ebe8";
+const CONTEXT_STROKE = "#c3c9c3";
+const CONTEXT_EDGE = "#d7dbd7";
+
+// ---- County tiers ----------------------------------------------------------
+// A county's tier is the best tier of any town we serve in it, so the map's
+// colour and the town list can never disagree.
+const tierRank: Record<AreaTier, number> = { core: 0, primary: 1, extended: 2 };
+
+const countyTier = new Map<string, AreaTier>();
+for (const area of areas) {
+ const key = area.county.replace(/ County$/, "");
+ const current = countyTier.get(key);
+ if (!current || tierRank[area.tier] < tierRank[current]) {
+ countyTier.set(key, area.tier);
+ }
+}
+
+const toPath = (ring: Array<[number, number]>, dy = 0): string =>
+ `${ring
+ .map(
+ ([lng, lat], i) =>
+ `${i === 0 ? "M" : "L"}${sx(lng).toFixed(1)},${(sy(lat) + dy).toFixed(1)}`,
+ )
+ .join("")}Z`;
+
+const shapes = counties
+ .map((county) => {
+ const tier = countyTier.get(county.name);
+ const ring = county.rings[0];
+ const centroidLat = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+ const centroidLng = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+ return {
+ county,
+ tier,
+ top: county.rings.map((r) => toPath(r)).join(" "),
+ edge: county.rings.map((r) => toPath(r, DEPTH)).join(" "),
+ maxLat: Math.max(...county.rings.flat().map((p) => p[1])),
+ cx: sx(centroidLng),
+ cy: sy(centroidLat),
+ fill: tier ? tierFill[tier] : CONTEXT_FILL,
+ stroke: tier ? tierStroke[tier] : CONTEXT_STROKE,
+ edgeFill: tier ? tierEdge[tier] : CONTEXT_EDGE,
+ };
+ })
+ // Painter's algorithm: draw the northernmost county first so its southern
+ // neighbours occlude its cut edge.
+ .sort((a, b) => b.maxLat - a.maxLat);
+
+/** County names printed on the plate — the ones we name in copy. */
+const NAMED_COUNTIES = new Set(["Jackson", "Calhoun", "Liberty"]);
+
+// ---- Towns -----------------------------------------------------------------
+const tierRadius: Record<AreaTier, number> = { core: 6, primary: 5.5, extended: 4.5 };
+
+interface Node {
+ area: (typeof areas)[number];
+ x: number;
+ y: number;
+ r: number;
+}
+const nodes: Node[] = areas.map((area) => ({
+ area,
+ x: sx(area.lng),
+ y: sy(area.lat),
+ r: tierRadius[area.tier],
+}));
+
+const hubNode = nodes.find((n) => n.area.slug === hub.slug)!;
+const spokes = nodes.filter((n) => n.area.slug !== hub.slug);
+
+/**
+ * County name plates. Marianna sits almost exactly on Jackson County's
+ * centroid, so a name printed there lands underneath the map pin — push any
+ * label that would collide with the pin down into clear space instead.
+ */
+const PIN_GUARD = { x: 78, up: 50, down: 14 };
+const countyLabels = shapes
+ .filter((s) => s.tier && NAMED_COUNTIES.has(s.county.name))
+ .map((s) => {
+ const clashesWithPin =
+ Math.abs(s.cx - hubNode.x) < PIN_GUARD.x &&
+ s.cy > hubNode.y - PIN_GUARD.up &&
+ s.cy < hubNode.y + PIN_GUARD.down;
+ return {
+ name: `${s.county.name.toUpperCase()} CO.`,
+ x: s.cx,
+ y: clashesWithPin ? hubNode.y + 44 : s.cy,
+ fill: s.tier === "core" ? "#0e3d20" : INK_SOFT,
+ };
+ });
+
+// ---- Label placement -------------------------------------------------------
+// Around Marianna the towns are genuinely close together, so labels placed
+// naively all centred above their dot overlap into an unreadable pile — exactly
+// where the map matters most. Positions are known at build time, so this
+// greedily tries a ring of candidate offsets per label and takes the first that
+// collides with nothing already placed. Anything that cannot be placed stays
+// hidden until its town is selected, rather than being allowed to overlap.
+const CHAR_W = 7.4; // ≈ advance width at font-size 15, weight 600
+const ASCENT = 12;
+const DESCENT = 4;
+
+type Anchor = "middle" | "start" | "end";
+interface Box {
+ x0: number;
+ y0: number;
+ x1: number;
+ y1: number;
+}
+
+const overlaps = (a: Box, b: Box): boolean =>
+ a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
+function labelBox(node: Node, dx: number, dy: number, anchor: Anchor): Box {
+ const w = node.area.name.length * CHAR_W;
+ const cx = node.x + dx;
+ const x0 = anchor === "middle" ? cx - w / 2 : anchor === "start" ? cx : cx - w;
+ const y = node.y + dy;
+ return { x0, y0: y - ASCENT, x1: x0 + w, y1: y + DESCENT };
+}
+
+const dotBoxes: Box[] = nodes.map((n) => ({
+ x0: n.x - n.r - 3,
+ y0: n.y - n.r - 3,
+ x1: n.x + n.r + 3,
+ y1: n.y + n.r + 3,
+}));
+
+const placedBoxes: Box[] = [];
+
+// The Marianna pin and its wordmark claim their space first — both are far
+// bigger than a town dot. Reserving a town-sized box here is what previously
+// let a neighbouring label print straight through the pin.
+placedBoxes.push(
+ { x0: hubNode.x - 13, y0: hubNode.y - 34, x1: hubNode.x + 13, y1: hubNode.y + 5 },
+ { x0: hubNode.x - 58, y0: hubNode.y - 48, x1: hubNode.x + 58, y1: hubNode.y - 27 },
+);
+
+for (const label of countyLabels) {
+ const w = (label.name.length + 5) * 6.4;
+ placedBoxes.push({
+ x0: label.x - w / 2,
+ y0: label.y - 9,
+ x1: label.x + w / 2,
+ y1: label.y + 5,
+ });
+}
+
+interface Placed {
+ node: Node;
+ dx: number;
+ dy: number;
+ anchor: Anchor;
+ hidden: boolean;
+}
+
+const candidatesFor = (n: Node): Array<[number, number, Anchor]> => [
+ [0, -(n.r + 8), "middle"],
+ [0, n.r + 16, "middle"],
+ [n.r + 7, 5, "start"],
+ [-(n.r + 7), 5, "end"],
+ [0, -(n.r + 24), "middle"],
+ [0, n.r + 31, "middle"],
+ [n.r + 7, -(n.r + 7), "start"],
+ [-(n.r + 7), -(n.r + 7), "end"],
+ [n.r + 7, n.r + 16, "start"],
+ [-(n.r + 7), n.r + 16, "end"],
+];
+
+const tierOrder: Record<AreaTier, number> = { core: 0, primary: 1, extended: 2 };
+const placementOrder = [...spokes].sort(
+ (a, b) =>
+ tierOrder[a.area.tier] - tierOrder[b.area.tier] ||
+ a.area.driveMinutes - b.area.driveMinutes ||
+ a.area.name.localeCompare(b.area.name),
+);
+
+const placed: Placed[] = [];
+for (const node of placementOrder) {
+ let chosen: Placed | null = null;
+ for (const [dx, dy, anchor] of candidatesFor(node)) {
+ const box = labelBox(node, dx, dy, anchor);
+ if (box.x0 < 4 || box.x1 > WIDTH - 4 || box.y0 < 4 || box.y1 > HEIGHT - 4) continue;
+ if (placedBoxes.some((p) => overlaps(box, p))) continue;
+ if (dotBoxes.some((d) => overlaps(box, d))) continue;
+ placedBoxes.push(box);
+ chosen = { node, dx, dy, anchor, hidden: false };
+ break;
+ }
+ placed.push(chosen ?? { node, dx: 0, dy: -(node.r + 8), anchor: "middle", hidden: true });
+}
+const labels = placed.sort((a, b) => a.node.area.name.localeCompare(b.node.area.name));
+
+// ---- Scale bar -------------------------------------------------------------
+// A degree of latitude is ~69.17 miles and the projection's Y axis is unscaled,
+// so px-per-mile follows directly from the projection scale.
+const PX_PER_MILE = scale / 69.17;
+const BAR_MILES = 20;
+const barPx = PX_PER_MILE * BAR_MILES;
+
+// ---- Grouped lists ---------------------------------------------------------
+const tiers: AreaTier[] = ["core", "primary", "extended"];
+const grouped = tiers.map((tier) => ({
+ tier,
+ label: tierLabels[tier],
+ blurb: tierBlurbs[tier],
+ swatch: tierFill[tier],
+ edge: tierStroke[tier],
+ items: areas
+ .filter((a) => a.tier === tier)
+ .sort((a, b) => a.driveMinutes - b.driveMinutes),
+}));
+
+const nodeData = nodes.map((n) => ({
+ slug: n.area.slug,
+ name: n.area.name,
+ county: n.area.county,
+ state: n.area.state,
+ minutes: n.area.driveMinutes,
+ tier: n.area.tier,
+ hasPage: Boolean(n.area.localNote?.length),
+}));
+---
+
+<div
+ x-data={`{
+ selected: '${hub.slug}',
+ towns: ${JSON.stringify(nodeData)},
+ get town() { return this.towns.find(t => t.slug === this.selected) },
+ tierLabel(t) { return ({ core: '${tierLabels.core}', primary: '${tierLabels.primary}', extended: '${tierLabels.extended}' })[t] }
+ }`}
+ class="grid gap-8 lg:grid-cols-[1.65fr_1fr] lg:items-start"
+>
+ {/* ---- The plat ---- */}
+ <div class="card overflow-hidden" data-reveal>
+ <div class="flex items-baseline justify-between gap-4 border-b border-rule px-5 py-3">
+ <span class="label-caps text-grass">Service area</span>
+ <span class="text-sm text-ink-soft">Florida Panhandle</span>
+ </div>
+
+ <svg
+ viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+ class="block h-auto w-full"
+ style={`background:${PAPER}`}
+ aria-hidden="true"
+ focusable="false"
+ >
+ {/* Counties: cut edge, then top face — north to south. */}
+ {
+ shapes.map((shape) => (
+ <g>
+ <path d={shape.edge} fill={shape.edgeFill} />
+ <path
+ d={shape.top}
+ fill={shape.fill}
+ stroke={shape.stroke}
+ stroke-width={shape.tier === "core" ? 1.8 : 1}
+ stroke-linejoin="round"
+ />
+ </g>
+ ))
+ }
+
+ {/* County name plates */}
+ {
+ countyLabels.map((label) => (
+ <text
+ x={label.x}
+ y={label.y}
+ text-anchor="middle"
+ fill={label.fill}
+ font-size="12"
+ font-weight="700"
+ letter-spacing="2.2"
+ style="font-family: var(--font-sans)"
+ >
+ {label.name}
+ </text>
+ ))
+ }
+
+ {/* Town dots */}
+ {
+ spokes.map((n) => (
+ <g
+ class="cursor-pointer"
+ x-on:mouseenter={`selected = '${n.area.slug}'`}
+ x-on:click={`selected = '${n.area.slug}'`}
+ >
+ <circle cx={n.x} cy={n.y} r="22" fill="transparent" />
+ <circle
+ cx={n.x}
+ cy={n.y}
+ r={n.r}
+ fill={PAPER}
+ stroke={tierStroke[n.area.tier]}
+ stroke-width="2.2"
+ />
+ <circle
+ cx={n.x}
+ cy={n.y}
+ r={n.r + 5}
+ fill="none"
+ stroke={INK}
+ stroke-width="1.6"
+ x-bind:stroke-opacity={`selected === '${n.area.slug}' ? 0.85 : 0`}
+ style="transition: stroke-opacity 0.15s ease"
+ />
+ </g>
+ ))
+ }
+
+ {/* Town labels, drawn above every dot so nothing sits on a name */}
+ {
+ labels.map(({ node, dx, dy, anchor, hidden }) => (
+ <text
+ x={node.x + dx}
+ y={node.y + dy}
+ text-anchor={anchor}
+ class="pointer-events-none"
+ fill={INK}
+ font-size="15"
+ font-weight="600"
+ fill-opacity={hidden ? 0 : 0.92}
+ style={`font-family: var(--font-sans); paint-order: stroke; stroke: ${PAPER}; stroke-width: 4px; stroke-linejoin: round;`}
+ x-bind:fill-opacity={`selected === '${node.area.slug}' ? 1 : ${hidden ? 0 : 0.92}`}
+ >
+ {node.area.name}
+ </text>
+ ))
+ }
+
+ {/* Marianna — a surveyor's marker, not another dot */}
+ <g
+ x-on:mouseenter={`selected = '${hub.slug}'`}
+ x-on:click={`selected = '${hub.slug}'`}
+ class="cursor-pointer"
+ >
+ <path
+ d={`M${hubNode.x},${hubNode.y + 2}c-8,-10.5 -11.5,-15.5 -11.5,-21a11.5,11.5 0 1 1 23,0c0,5.5 -3.5,10.5 -11.5,21Z`}
+ fill="#f0a92b"
+ stroke={INK}
+ stroke-width="1.6"
+ stroke-linejoin="round"
+ />
+ <circle cx={hubNode.x} cy={hubNode.y - 19} r="4.2" fill={INK} />
+ <text
+ x={hubNode.x}
+ y={hubNode.y - 32}
+ text-anchor="middle"
+ fill={INK}
+ font-size="17"
+ font-weight="700"
+ style={`font-family: var(--font-display); letter-spacing: 0.02em; paint-order: stroke; stroke: ${PAPER}; stroke-width: 5px; stroke-linejoin: round;`}
+ >
+ Marianna
+ </text>
+ </g>
+
+ {/* Scale bar */}
+ <g transform={`translate(${PAD_X + 4} ${HEIGHT - 26})`}>
+ <line x1="0" y1="0" x2={barPx} y2="0" stroke={INK_SOFT} stroke-width="1.6" />
+ <line x1="0" y1="-4" x2="0" y2="4" stroke={INK_SOFT} stroke-width="1.6" />
+ <line x1={barPx} y1="-4" x2={barPx} y2="4" stroke={INK_SOFT} stroke-width="1.6" />
+ <text
+ x={barPx / 2}
+ y="16"
+ text-anchor="middle"
+ fill={INK_SOFT}
+ font-size="11.5"
+ font-weight="600"
+ style="font-family: var(--font-sans)"
+ >
+ {BAR_MILES} miles
+ </text>
+ </g>
+
+ {/* North arrow */}
+ <g transform={`translate(${WIDTH - PAD_X - 14} ${HEIGHT - 32})`}>
+ <path d="M0,-13 L4.5,4 L0,0.5 L-4.5,4 Z" fill={INK_SOFT} />
+ <text
+ x="0"
+ y="17"
+ text-anchor="middle"
+ fill={INK_SOFT}
+ font-size="11.5"
+ font-weight="700"
+ style="font-family: var(--font-sans)"
+ >
+ N
+ </text>
+ </g>
+ </svg>
+
+ {/* Legend */}
+ <div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-rule px-5 py-3.5">
+ {
+ grouped.map((g) => (
+ <span class="flex items-center gap-2 text-xs font-semibold text-ink-soft">
+ <span
+ class="h-3 w-3 rounded-[1px] border"
+ style={`background:${g.swatch}; border-color:${g.edge}`}
+ aria-hidden="true"
+ />
+ {g.label}
+ </span>
+ ))
+ }
+ <span class="ml-auto hidden text-xs text-ink-faint sm:inline">
+ Hover a town for details
+ </span>
+ </div>
+ </div>
+
+ {/* ---- Record card, driven by the map selection ---- */}
+ <div class="card-filed p-6" data-reveal="right" x-cloak>
+ <p class="label-caps text-grass">Coverage detail</p>
+
+ <h3 class="mt-3 font-display text-3xl text-ink" x-text="town.name">
+ {hub.name}
+ </h3>
+
+ <p class="mt-1 text-sm text-ink-soft" x-text="town.county + ', ' + town.state">
+ {hub.county}, {hub.state}
+ </p>
+
+ <dl class="mt-6 space-y-4 border-t border-rule pt-5">
+ <div class="flex items-start gap-3">
+ <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+ <div>
+ <dt class="label-caps text-ink-faint">Drive time from Marianna</dt>
+ <dd class="mt-0.5 text-base font-bold text-ink">
+ <template x-if="town.minutes === 0">
+ <span>Home base</span>
+ </template>
+ <template x-if="town.minutes > 0">
+ <span><span x-text="town.minutes"></span> minutes</span>
+ </template>
+ </dd>
+ </div>
+ </div>
+
+ <div class="flex items-start gap-3">
+ <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+ <div>
+ <dt class="label-caps text-ink-faint">Coverage tier</dt>
+ <dd class="mt-0.5 text-base font-bold text-ink" x-text="tierLabel(town.tier)">
+ {tierLabels.core}
+ </dd>
+ </div>
+ </div>
+ </dl>
+
+ <template x-if="town.hasPage">
+ <a
+ x-bind:href="'/service-areas/' + town.slug"
+ class="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-grass underline underline-offset-2"
+ >
+ <span x-text="'Lawn care in ' + town.name"></span>
+ <ArrowRight class="h-4 w-4" aria-hidden="true" />
+ </a>
+ </template>
+
+ <p class="mt-6 border-t border-rule pt-5 text-sm leading-relaxed text-ink-soft">
+ Not listed, or right on the edge? Call and ask — we travel up to about two
+ hours for larger jobs and we will tell you straight if we can get there.
+ </p>
+ </div>
+</div>
+
+{/* ---- The authoritative, no-JS town list ---- */}
+<div class="mt-12 grid gap-6 md:grid-cols-3" data-reveal-group>
+ {
+ grouped.map((g) => (
+ <div class="card p-6" data-reveal>
+ <div class="flex items-center gap-2.5">
+ <span
+ class="h-3.5 w-3.5 rounded-[1px] border"
+ style={`background:${g.swatch}; border-color:${g.edge}`}
+ aria-hidden="true"
+ />
+ <h3 class="font-display text-xl text-ink">{g.label}</h3>
+ </div>
+ <p class="mt-2.5 text-sm leading-relaxed text-ink-soft">{g.blurb}</p>
+ <ul class="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
+ {g.items.map((a) =>
+ a.localNote?.length ? (
+ <li>
+ <a
+ href={`/service-areas/${a.slug}`}
+ class="text-sm font-semibold text-grass underline underline-offset-2"
+ >
+ {a.name}
+ </a>
+ </li>
+ ) : (
+ <li class="text-sm text-ink-soft">{a.name}</li>
+ ),
+ )}
+ </ul>
+ </div>
+ ))
+ }
+</div>

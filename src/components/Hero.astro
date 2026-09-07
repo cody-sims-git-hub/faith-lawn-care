@@ -1,0 +1,108 @@
+---
+/**
+ * Homepage hero, modelled on the reference site (mysecurtek.com).
+ *
+ * A deep green gradient over the company's own photograph, heavily dimmed so it
+ * reads as texture rather than competing with the headline. Above it: a pill
+ * eyebrow with a live dot, a two-tone headline (white then gold), a lede, pill
+ * CTAs, and a stat row divided off by a hairline.
+ *
+ * The stats translate the reference's "35+ / 24/7 / 100% Local / 0 Contractors"
+ * idea into what actually matters here — and every one is true and checkable
+ * against the rest of the site, not marketing filler.
+ *
+ * The h1 uses animate-rise rather than a fade: Chrome will not nominate text as
+ * an LCP candidate while it is opacity:0, so fading it would charge the entire
+ * animation duration to the LCP measurement.
+ */
+import { Image } from "astro:assets";
+import { Phone, MessageSquare } from "@lucide/astro";
+import heroImage from "~/assets/hero-lawn.jpg";
+import { PHONE_DISPLAY, TEL_HREF, SMS_HREF } from "~/lib/site-meta";
+
+const stats = [
+  { value: "12", accent: "", label: "Services, one crew" },
+  { value: "3", accent: " Counties", label: "Jackson, Calhoun & Liberty" },
+  { value: "100%", accent: " Local", label: "Family-run out of Marianna" },
+  { value: "0", accent: " Contracts", label: "Cancel any time" },
+];
+---
+
+<section class="hero-ground relative isolate overflow-hidden">
+  {/* The photograph, under the gradient. */}
+  <div class="absolute inset-0 -z-10" aria-hidden="true">
+    <Image
+      src={heroImage}
+      alt=""
+      widths={[640, 960, 1280, 1600, 1920]}
+      sizes="100vw"
+      width={1920}
+      height={1080}
+      quality={58}
+      loading="eager"
+      fetchpriority="high"
+      class="hero-photo h-full w-full object-cover"
+    />
+  </div>
+
+  <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:py-28">
+    <p class="eyebrow-pill">
+      <span class="animate-dot h-2 w-2 rounded-full bg-gold" aria-hidden="true"></span>
+      Serving the Panhandle since 2021
+    </p>
+
+    <h1
+      class="animate-rise mt-7 max-w-4xl text-[2.9rem] leading-[1.02] text-white sm:text-6xl lg:text-7xl"
+    >
+      Full service lawn care
+      <span class="block text-gold">&amp; junk removal</span>
+    </h1>
+
+    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-on-dark-soft sm:text-xl">
+      Mowing, landscaping, tree work, pressure washing and hauling across
+      Jackson, Calhoun and Liberty counties — done and cleaned up by one local
+      crew. We show up when we say we will.
+    </p>
+
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+      <a
+        href="/contact"
+        data-track="hero-estimate"
+        class="btn btn-gold text-base hover:btn-gold-hover"
+      >
+        Get a free estimate
+      </a>
+      <a href={TEL_HREF} data-track="hero-call" class="btn btn-ghost-dark text-base">
+        <Phone class="h-5 w-5" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+      <a
+        href={SMS_HREF}
+        data-track="hero-text"
+        class="btn btn-ghost-dark text-base sm:hidden"
+      >
+        <MessageSquare class="h-5 w-5" aria-hidden="true" />
+        Text us a photo
+      </a>
+    </div>
+
+    {/* Stat row */}
+    <dl
+      class="mt-14 grid gap-8 border-t border-white/15 pt-9 sm:grid-cols-2 lg:grid-cols-4"
+      data-reveal-group
+      data-reveal-stagger="80"
+    >
+      {
+        stats.map((stat) => (
+          <div data-reveal="fade">
+            <dt class="font-display text-3xl text-gold sm:text-4xl">
+              {stat.value}
+              {stat.accent && <span class="text-white">{stat.accent}</span>}
+            </dt>
+            <dd class="mt-1.5 text-sm text-on-dark-soft">{stat.label}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>

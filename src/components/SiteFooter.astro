@@ -1,0 +1,131 @@
+---
+import { Phone, MessageSquare, MapPin, Clock } from "@lucide/astro";
+import FacebookIcon from "./FacebookIcon.astro";
+import Logo from "./Logo.astro";
+import {
+ PHONE_DISPLAY,
+ TEL_HREF,
+ SMS_HREF,
+ FACEBOOK_URL,
+ BASE_CITY,
+ BASE_STATE_CODE,
+ HOURS,
+ LEGAL_NAME,
+} from "~/lib/site-meta";
+import { services } from "~/lib/services";
+import { areasByTier } from "~/lib/areas";
+
+const year = new Date().getFullYear();
+const coreAreas = areasByTier("core");
+---
+
+<footer class="border-t border-rule bg-paper">
+ <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+ <div class="lg:col-span-1">
+ <Logo />
+ <p class="mt-4 max-w-xs text-sm leading-relaxed text-ink-soft">
+ Full-service lawn care, landscaping, and junk removal out of {BASE_CITY}, {BASE_STATE_CODE}.
+ Free estimates, no contracts, and everything hauled away when we go.
+ </p>
+
+ <div class="mt-5 flex flex-wrap gap-2">
+ <a
+ href={TEL_HREF}
+ data-track="footer-call"
+ class="inline-flex items-center gap-2 rounded-sm bg-forest px-4 py-2.5 text-sm font-bold text-white"
+ >
+ <Phone class="h-4 w-4" aria-hidden="true" />
+ Call
+ </a>
+ <a
+ href={SMS_HREF}
+ data-track="footer-text"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-grass"
+ >
+ <MessageSquare class="h-4 w-4" aria-hidden="true" />
+ Text
+ </a>
+ <a
+ href={FACEBOOK_URL}
+ target="_blank"
+ rel="noopener noreferrer"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-4 py-2.5 text-sm font-bold text-ink hover:border-grass"
+ >
+ <FacebookIcon class="h-4 w-4" />
+ Facebook
+ </a>
+ </div>
+ </div>
+
+ <div>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Services</h2>
+ <ul class="mt-4 space-y-2">
+ {
+ services.map((s) => (
+ <li>
+ <a
+ href={`/services/${s.slug}`}
+ class="text-sm text-ink-soft transition-colors hover:text-ink"
+ >
+ {s.name}
+ </a>
+ </li>
+ ))
+ }
+ </ul>
+ </div>
+
+ <div>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Service Areas</h2>
+ <ul class="mt-4 space-y-2">
+ {
+ coreAreas.slice(0, 8).map((a) => (
+ <li class="text-sm text-ink-soft">{a.name}, {a.state}</li>
+ ))
+ }
+ <li>
+ <a
+ href="/service-areas"
+ class="text-sm font-semibold text-grass hover:underline"
+ >
+ See the full coverage map →
+ </a>
+ </li>
+ </ul>
+ </div>
+
+ <div>
+ <h2 class="text-sm font-bold uppercase tracking-widest text-grass">Hours</h2>
+ <ul class="mt-4 space-y-2">
+ {
+ HOURS.map((h) => (
+ <li class="flex items-start gap-2 text-sm text-ink-soft">
+ <Clock class="mt-0.5 h-4 w-4 shrink-0 text-grass" aria-hidden="true" />
+ <span>
+ <span class="text-ink">{h.days}</span>
+ <br />
+ {h.close ? `${h.open} – ${h.close}` : h.open}
+ </span>
+ </li>
+ ))
+ }
+ <li class="flex items-start gap-2 pt-1 text-sm text-ink-soft">
+ <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-grass" aria-hidden="true" />
+ <span>Based in {BASE_CITY}, {BASE_STATE_CODE} — we come to you</span>
+ </li>
+ </ul>
+ </div>
+ </div>
+
+ <div class="border-t border-rule">
+ <div
+ class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-6"
+ >
+ <p>© {year} {LEGAL_NAME}. All rights reserved.</p>
+ <p class="flex items-center gap-4">
+ <a href="/privacy" class="hover:text-ink">Privacy</a>
+ <a href={TEL_HREF} class="font-semibold text-grass">{PHONE_DISPLAY}</a>
+ </p>
+ </div>
+ </div>
+</footer>

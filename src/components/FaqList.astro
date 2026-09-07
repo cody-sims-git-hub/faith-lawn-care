@@ -1,0 +1,53 @@
+---
+/**
+ * FAQ accordion.
+ *
+ * Built on native <details>/<summary> rather than an Alpine widget: it is
+ * keyboard-accessible and screen-reader-correct for free, it works with
+ * JavaScript off, and — the part that matters for SEO — the answer text is in
+ * the DOM whether or not the item is open, so it backs the FAQPage JSON-LD.
+ *
+ * The first item is open by default. Nine collapsed hairline rows read as an
+ * empty section and give no clue the rows do anything; showing one answer
+ * demonstrates the interaction and gives the block some weight.
+ */
+import { Plus } from "@lucide/astro";
+import { faqs } from "~/lib/faq";
+
+interface Props {
+  /** Limit to the first N questions. */
+  limit?: number;
+}
+const { limit } = Astro.props;
+const items = limit ? faqs.slice(0, limit) : faqs;
+---
+
+<div class="space-y-3" data-reveal-group data-reveal-stagger="50">
+  {
+    items.map((faq, i) => (
+      <details
+        class="group card overflow-hidden px-5 sm:px-6"
+        open={i === 0}
+        data-reveal="fade"
+      >
+        <summary class="flex cursor-pointer list-none items-start justify-between gap-4 py-4 text-left">
+          <h3 class="text-base font-bold leading-snug text-forest sm:text-lg">{faq.q}</h3>
+          <span
+            class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-paper-sunk text-gold-ink transition-transform duration-300 group-open:rotate-45 group-open:bg-gold group-open:text-forest"
+            aria-hidden="true"
+          >
+            <Plus class="h-4 w-4" />
+          </span>
+        </summary>
+        <p class="pb-5 pr-10 text-[0.95rem] leading-relaxed text-ink-soft">{faq.a}</p>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  /* Safari paints its own disclosure marker without this. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

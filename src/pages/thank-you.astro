@@ -1,0 +1,45 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import { Check, Phone, ArrowLeft } from "@lucide/astro";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+---
+
+<Layout
+ title="Request Received | Faith Lawn Care"
+ description="Thanks — we have your estimate request for Faith Lawn Care and will be in touch shortly, usually the same day. Need us sooner? Call or text 850-209-8982."
+ path="/thank-you"
+>
+ <section class="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32">
+ <span
+ class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-paper-sunk text-grass-lit"
+ >
+ <Check class="h-8 w-8" aria-hidden="true" />
+ </span>
+
+ <h1 class="mt-7 font-display text-4xl sm:text-5xl">
+ Request received
+ </h1>
+
+ <p class="mt-5 text-lg leading-relaxed text-ink-soft">
+ Thanks — we have got your details and will get back to you shortly, usually
+ the same day. If you need us sooner than that, calling is always fastest.
+ </p>
+
+ <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+ <a
+ href={TEL_HREF}
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-forest px-7 py-4 text-base font-bold text-white"
+ >
+ <Phone class="h-5 w-5" aria-hidden="true" />
+ {PHONE_DISPLAY}
+ </a>
+ <a
+ href="/"
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm border border-rule px-7 py-4 text-base font-bold text-ink transition-colors hover:border-grass"
+ >
+ <ArrowLeft class="h-5 w-5 text-grass" aria-hidden="true" />
+ Back to the site
+ </a>
+ </div>
+ </section>
+</Layout>

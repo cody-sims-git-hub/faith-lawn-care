@@ -1,0 +1,36 @@
+---
+interface Props {
+ eyebrow?: string;
+ title: string;
+ /** Renders the heading as an h1 (one per page). */
+ as?: "h1" | "h2";
+ align?: "left" | "center";
+ class?: string;
+}
+const { eyebrow, title, as = "h2", align = "left", class: className = "" } = Astro.props;
+const Tag = as;
+---
+
+<div
+ class:list={[
+ "max-w-3xl",
+ align === "center" && "mx-auto text-center",
+ className,
+ ]}
+ data-reveal
+>
+ {
+ eyebrow && (
+ <p class="eyebrow-dash">
+    <span class="eyebrow-dash-rule" aria-hidden="true"></span>
+    {eyebrow}
+  </p>
+ )
+ }
+ <Tag class="text-balance text-4xl font-bold leading-[1.05] sm:text-5xl">
+ {title}
+ </Tag>
+ <div class="mt-5 text-lg leading-relaxed text-ink-soft">
+ <slot />
+ </div>
+</div>

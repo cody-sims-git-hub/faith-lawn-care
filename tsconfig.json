@@ -1,0 +1,15 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  // functions/ is Workers runtime code, not browser code. It has its own
+  // tsconfig because @cloudflare/workers-types and the DOM lib define the same
+  // globals (fetch, Response, FormData) with different shapes — loading both
+  // into one program produces a wall of bogus conflicts.
+  "exclude": ["dist", "functions"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"]
+    }
+  }
+}

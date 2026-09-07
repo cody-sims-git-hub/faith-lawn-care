@@ -1,0 +1,51 @@
+---
+import { Phone, MessageSquare } from "@lucide/astro";
+import { PHONE_DISPLAY, TEL_HREF, SMS_HREF } from "~/lib/site-meta";
+
+interface Props {
+ title?: string;
+ body?: string;
+}
+const {
+ title = "Get a free estimate",
+ body = "Call or text and tell us what the property needs. We will come look, give you a firm price, and you decide from there.",
+} = Astro.props;
+---
+
+<section class="relative isolate overflow-hidden border-y border-rule">
+
+ <div class="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 sm:py-24" data-reveal>
+ <h2 class="text-balance font-display text-4xl sm:text-5xl">
+ {title}
+ </h2>
+ <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
+ {body}
+ </p>
+
+ <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+ <a
+ href={TEL_HREF}
+ data-track="cta-call"
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm bg-forest px-8 py-4 text-lg font-bold text-white transition-colors hover:bg-forest-deep"
+ >
+ <Phone class="h-5 w-5" aria-hidden="true" />
+ {PHONE_DISPLAY}
+ </a>
+ <a
+ href={SMS_HREF}
+ data-track="cta-text"
+ class="inline-flex items-center justify-center gap-2.5 rounded-sm border border-rule px-8 py-4 text-lg font-bold text-ink transition-colors hover:border-grass"
+ >
+ <MessageSquare class="h-5 w-5 text-grass" aria-hidden="true" />
+ Send a text
+ </a>
+ </div>
+
+ <p class="mt-6 text-sm text-ink-soft">
+ Prefer to type it out? <a
+ href="/contact"
+ class="font-semibold text-grass hover:underline">Use the estimate form</a
+ >.
+ </p>
+ </div>
+</section>

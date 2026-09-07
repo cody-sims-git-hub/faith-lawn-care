@@ -1,0 +1,132 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import PageHeader from "~/components/PageHeader.astro";
+import Section from "~/components/Section.astro";
+import CtaBand from "~/components/CtaBand.astro";
+import { Image } from "astro:assets";
+import { ArrowRight } from "@lucide/astro";
+import FacebookIcon from "~/components/FacebookIcon.astro";
+import heroLawn from "~/assets/hero-lawn.jpg";
+import lawnBrickHouse from "~/assets/lawn-brick-house.jpg";
+import flyer from "~/assets/flyer.jpg";
+import { FACEBOOK_URL } from "~/lib/site-meta";
+import { localBusiness, breadcrumbs } from "~/lib/structured-data";
+
+/**
+ * Every photo here is the company's own work, taken from their Facebook posts.
+ * As they send more, add them to this list — the grid and the lightbox-free
+ * layout handle any count.
+ */
+/**
+ * Captions render BELOW each photograph, never over it. An overlay version put
+ * dark caption text on a gradient scrim built for the old dark theme, and on
+ * these bright, busy lawn photos it was unreadable. A photograph this variable
+ * cannot be relied on to carry text.
+ *
+ * `width`/`height` cap the <img src> fallback. Astro otherwise points it at the
+ * full-size original, which for the 3051px hero photo is a ~900kB download for
+ * any client that ignores srcset.
+ */
+const shots = [
+ {
+ image: heroLawn,
+ width: 1440,
+ height: 648,
+ alt: "A wide rural property in Jackson County, Florida, freshly mowed by Faith Lawn Care, with mowing stripes running the length of the yard toward a treeline",
+ caption: "Acreage cut in Jackson County",
+ detail: "Open ground, clean lines, edges trimmed to the treeline.",
+ wide: true,
+ },
+ {
+ image: lawnBrickHouse,
+ width: 960,
+ height: 720,
+ alt: "A large striped lawn in front of a brick house, freshly cut by Faith Lawn Care",
+ caption: "Residential property, full cut",
+ detail: "Mowed, edged, and blown off — the standard weekly visit.",
+ wide: false,
+ },
+ {
+ image: flyer,
+ width: 1254,
+ height: 1254,
+ alt: "Faith Lawn Care services flyer listing landscaping design, seasonal cleanups, fertilization, mulch, hedge trimming, irrigation, tree removal, pressure washing, and junk removal",
+ caption: "Everything we offer",
+ detail: "The full service list, straight off our flyer.",
+ wide: false,
+ },
+];
+
+const jsonLd = [
+ localBusiness(),
+ breadcrumbs([
+ { name: "Home", path: "/" },
+ { name: "Gallery", path: "/gallery" },
+ ]),
+];
+---
+
+<Layout
+ title="Our Work | Faith Lawn Care Gallery | Marianna, FL"
+ description="Photos of lawn care and property work by Faith Lawn Care across Jackson, Calhoun, and Liberty counties in the Florida Panhandle."
+ path="/gallery"
+ jsonLd={jsonLd}
+>
+ <PageHeader eyebrow="Our work" title="Gallery">
+ Real properties we look after around Marianna and the surrounding counties.
+ We post new work to Facebook as we go.
+ </PageHeader>
+
+ <Section>
+ <div
+ class="grid items-start gap-5 sm:grid-cols-2"
+ data-reveal-group
+ data-reveal-stagger="90"
+ >
+ {
+ shots.map((shot) => (
+          <figure
+            class:list={["card group overflow-hidden", shot.wide && "sm:col-span-2"]}
+            data-reveal="fade"
+          >
+            <div class="overflow-hidden">
+              <Image
+                src={shot.image}
+                alt={shot.alt}
+                widths={[480, 720, 1080, 1440]}
+                sizes={shot.wide ? "(min-width: 640px) 90vw, 95vw" : "(min-width: 640px) 45vw, 95vw"}
+                width={shot.width}
+                height={shot.height}
+                quality={70}
+                loading="lazy"
+                class="w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+            </div>
+            <figcaption class="border-t border-rule bg-paper p-5">
+              <p class="font-display text-lg text-ink">{shot.caption}</p>
+              <p class="mt-1 text-sm text-ink-soft">{shot.detail}</p>
+            </figcaption>
+          </figure>
+ ))
+ }
+ </div>
+
+ <div class="mt-12 text-center" data-reveal>
+ <a
+ href={FACEBOOK_URL}
+ target="_blank"
+ rel="noopener noreferrer"
+ class="inline-flex items-center gap-2.5 rounded-sm border border-rule px-6 py-3.5 text-base font-bold text-ink transition-colors hover:border-grass"
+ >
+ <FacebookIcon class="h-5 w-5 text-grass" />
+ See more on Facebook
+ <ArrowRight class="h-4 w-4 text-grass" aria-hidden="true" />
+ </a>
+ </div>
+ </Section>
+
+ <CtaBand
+ title="Want your yard on this page?"
+ body="Call or text for a free estimate. We will come look at the property and give you a firm price."
+ />
+</Layout>

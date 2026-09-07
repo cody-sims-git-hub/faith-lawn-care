@@ -1,0 +1,160 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import PageHeader from "~/components/PageHeader.astro";
+import Section from "~/components/Section.astro";
+import ServiceCard from "~/components/ServiceCard.astro";
+import FaqList from "~/components/FaqList.astro";
+import CtaBand from "~/components/CtaBand.astro";
+import { Clock, MapPin } from "@lucide/astro";
+import { areasWithPages, tierLabels, tierBlurbs, type Area, hub } from "~/lib/areas";
+import { services, featuredServices } from "~/lib/services";
+import { localBusiness, breadcrumbs, serviceCatalog } from "~/lib/structured-data";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+
+// Only towns with genuinely distinct local content get a page. A page per town
+// built from the same template with the name swapped is a doorway page, and
+// Google treats a cluster of them as exactly that.
+export function getStaticPaths() {
+ return areasWithPages.map((area) => ({
+ params: { slug: area.slug },
+ props: { area },
+ }));
+}
+
+interface Props {
+ area: Area;
+}
+const { area } = Astro.props;
+
+const jsonLd = [
+ localBusiness(),
+ serviceCatalog(services),
+ breadcrumbs([
+ { name: "Home", path: "/" },
+ { name: "Service Areas", path: "/service-areas" },
+ { name: area.name, path: `/service-areas/${area.slug}` },
+ ]),
+];
+---
+
+<Layout
+ title={`Lawn Care in ${area.name}, ${area.state} | Faith Lawn Care`}
+ description={`Lawn mowing, landscaping, tree work, pressure washing, and junk removal in ${area.name}, ${area.county}. Free estimates — call or text ${PHONE_DISPLAY}.`}
+ path={`/service-areas/${area.slug}`}
+ jsonLd={jsonLd}
+>
+ <PageHeader
+ eyebrow={area.county}
+ title={`Lawn Care in ${area.name}`}
+ trail={[{ name: "Service Areas", path: "/service-areas" }]}
+ >
+ {
+ area.slug === hub.slug ? (
+ <>
+ Home base. Full-service lawn care, landscaping, and junk removal across
+ {" "}{area.name} and the rest of {area.county} — this is where we are most
+ days.
+ </>
+ ) : (
+ <>
+ Full-service lawn care, landscaping, and junk removal for {area.name} and
+ the surrounding area — the same crew and the same standard we run at home
+ in Marianna.
+ </>
+ )
+ }
+ </PageHeader>
+
+ <Section>
+ <div class="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
+ <div>
+ <h2 class="font-display text-2xl text-ink" data-reveal>
+ What we see in {area.name}
+ </h2>
+ <div class="mt-6 space-y-5" data-reveal-group>
+ {
+ area.localNote?.map((paragraph) => (
+ <p class="text-lg leading-relaxed text-ink-soft" data-reveal="fade">
+ {paragraph}
+ </p>
+ ))
+ }
+ </div>
+ </div>
+
+ <aside class="lg:sticky lg:top-24 lg:self-start">
+ <div class="card rounded-md p-6" data-reveal="right">
+ <h2 class="font-display text-xl text-ink">
+ Coverage
+ </h2>
+
+ <dl class="mt-5 space-y-4">
+ <div class="flex items-start gap-3">
+ <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+ <div>
+ <dt class="text-xs font-semibold uppercase tracking-wider text-ink-soft">
+ County
+ </dt>
+ <dd class="text-base font-bold text-ink">{area.county}</dd>
+ </div>
+ </div>
+ <div class="flex items-start gap-3">
+ <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
+ <div>
+ <dt class="text-xs font-semibold uppercase tracking-wider text-ink-soft">
+ From Marianna
+ </dt>
+ <dd class="text-base font-bold text-ink">
+ {area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} minutes`}
+ </dd>
+ </div>
+ </div>
+ </dl>
+
+ <p class="mt-5 border-t border-rule pt-5 text-sm leading-relaxed text-ink-soft">
+ {tierBlurbs[area.tier]}
+ </p>
+
+ <a
+ href={TEL_HREF}
+ data-track="area-call"
+ class="mt-6 flex items-center justify-center gap-2 rounded-sm bg-forest px-5 py-3.5 text-base font-bold text-white"
+ >
+ Call {PHONE_DISPLAY}
+ </a>
+ </div>
+ </aside>
+ </div>
+ </Section>
+
+ <Section band>
+ <h2 class="font-display text-3xl text-ink" data-reveal>
+ Popular in {area.name}
+ </h2>
+ <p class="mt-3 max-w-2xl text-lg text-ink-soft" data-reveal>
+ All twelve services are available here. These are the ones we get called
+ for most.
+ </p>
+ <div
+ class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+ data-reveal-group
+ data-reveal-stagger="70"
+ >
+ {featuredServices.map((service) => <ServiceCard service={service} />)}
+ </div>
+ </Section>
+
+ <Section>
+ <h2 class="font-display text-3xl text-ink" data-reveal>
+ Common questions
+ </h2>
+ <div class="mt-8 max-w-3xl">
+ <FaqList limit={5} />
+ </div>
+ </Section>
+
+ <CtaBand
+ title={`Serving ${area.name} — ${tierLabels[area.tier]}`}
+ body="Call or text and we will come look at the property. Free estimate, firm price, no obligation."
+ />
+</Layout>

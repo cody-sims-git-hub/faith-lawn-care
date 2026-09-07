@@ -1,0 +1,176 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import Hero from "~/components/Hero.astro";
+import Section from "~/components/Section.astro";
+import SectionHeading from "~/components/SectionHeading.astro";
+import ServiceCard from "~/components/ServiceCard.astro";
+import CoverageMap from "~/components/CoverageMap.astro";
+import FaqList from "~/components/FaqList.astro";
+import CtaBand from "~/components/CtaBand.astro";
+import { Image } from "astro:assets";
+import { ArrowRight, PhoneCall, ClipboardList, Sparkles, Phone } from "@lucide/astro";
+
+import lawnPhoto from "~/assets/lawn-brick-house.jpg";
+import { featuredServices, services } from "~/lib/services";
+import { faqs } from "~/lib/faq";
+import { localBusiness, serviceCatalog, faqPage } from "~/lib/structured-data";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+
+const steps = [
+ {
+ icon: PhoneCall,
+ title: "Call or text",
+ body: "Tell us what you need — or just send a photo of the yard. Fastest way to get a real answer.",
+ },
+ {
+ icon: ClipboardList,
+ title: "We come look",
+ body: "We walk the property and give you a firm price. Free, and no obligation to book anything.",
+ },
+ {
+ icon: Sparkles,
+ title: "We get it done",
+ body: "On the day we said, at the price we quoted, with every clipping and limb hauled off.",
+ },
+];
+
+const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
+---
+
+<Layout
+ title="Faith Lawn Care | Lawn Care & Junk Removal in Marianna, FL"
+ description="Full-service lawn care, landscaping, tree work, pressure washing, and junk removal in Marianna and across Jackson, Calhoun, and Liberty counties."
+ path="/"
+ jsonLd={jsonLd}
+>
+ <Hero />
+
+ {/* ---- Services ---- */}
+ <Section band id="services">
+ <SectionHeading eyebrow="What we do" title="One crew for the whole property">
+ Most of our customers started with mowing and kept us for everything else.
+ Here is what gets asked for most — there are twelve services in all.
+ </SectionHeading>
+
+ <div
+ class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+ data-reveal-group
+ data-reveal-stagger="80"
+ >
+ {featuredServices.map((service) => <ServiceCard service={service} />)}
+ </div>
+
+ <div class="mt-10" data-reveal>
+ <a
+ href="/services"
+ class="inline-flex items-center gap-2 rounded-sm border border-rule px-6 py-3.5 text-base font-bold text-ink transition-colors hover:border-grass"
+ >
+ See all twelve services
+ <ArrowRight class="h-4 w-4 text-grass" aria-hidden="true" />
+ </a>
+ </div>
+ </Section>
+
+ {/* ---- How it works ---- */}
+ <Section>
+ <div class="grid gap-14 lg:grid-cols-2 lg:items-center">
+ <div>
+ <SectionHeading eyebrow="How it works" title="No runaround">
+ You should not have to chase a lawn company for a price or wonder
+ whether they are coming. Three steps, and you always know where you
+ stand.
+ </SectionHeading>
+
+ <ol class="mt-10 space-y-7" data-reveal-group>
+ {
+ steps.map((step, i) => (
+ <li class="flex gap-5" data-reveal>
+ <span
+ class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm bg-paper-sunk text-grass-lit"
+ >
+ <step.icon class="h-6 w-6" aria-hidden="true" />
+ </span>
+ <div>
+ <h3 class="text-lg font-bold text-ink">
+ <span class="mr-2 text-grass">{i + 1}.</span>
+ {step.title}
+ </h3>
+ <p class="mt-1.5 text-base leading-relaxed text-ink-soft">
+ {step.body}
+ </p>
+ </div>
+ </li>
+ ))
+ }
+ </ol>
+ </div>
+
+ <div class="" data-reveal="right">
+ <div
+ class=" relative"
+ >
+ <Image
+ src={lawnPhoto}
+ alt="A large striped lawn in Jackson County, Florida, mowed by Faith Lawn Care, with a brick house in the background"
+ widths={[480, 720, 960]}
+ sizes="(min-width: 1024px) 40vw, 90vw"
+ quality={68}
+ loading="lazy"
+ class="w-full rounded-lg object-cover"
+ />
+ </div>
+ </div>
+ </div>
+ </Section>
+
+ {/* ---- Coverage ---- */}
+ <Section band id="areas">
+ <SectionHeading eyebrow="Where we work" title="Marianna out to about two hours">
+ Jackson County is home and we are there weekly. Calhoun and Liberty run on
+ scheduled routes, and we will travel further for bigger jobs.
+ </SectionHeading>
+
+ <div class="mt-12">
+ <CoverageMap />
+ </div>
+ </Section>
+
+ {/* ---- FAQ ---- */}
+  <Section id="faq" band>
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div class="lg:sticky lg:top-28 lg:self-start">
+        <SectionHeading eyebrow="Questions" title="The things people ask first">
+          Straight answers. If yours is not here, call and ask — we would rather
+          tell you now than surprise you later.
+        </SectionHeading>
+
+        <div class="card mt-8 p-6" data-reveal>
+          <p class="font-display text-lg text-forest">Still not sure?</p>
+          <p class="mt-2 text-sm leading-relaxed text-ink-soft">
+            Tell us what the property needs and we will give you a straight
+            answer — free, with no obligation to book anything.
+          </p>
+          <div class="mt-5 flex flex-col gap-2.5">
+            <a
+              href={TEL_HREF}
+              data-track="faq-call"
+              class="btn btn-gold w-full py-3 text-sm hover:btn-gold-hover"
+            >
+              <Phone class="h-4 w-4" aria-hidden="true" />
+              {PHONE_DISPLAY}
+            </a>
+            <a href="/contact" class="btn btn-outline w-full py-3 text-sm">
+              Request an estimate
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <FaqList />
+      </div>
+    </div>
+  </Section>
+
+ <CtaBand />
+</Layout>
