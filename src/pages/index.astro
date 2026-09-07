@@ -8,12 +8,13 @@ import CoverageMap from "~/components/CoverageMap.astro";
 import FaqList from "~/components/FaqList.astro";
 import CtaBand from "~/components/CtaBand.astro";
 import { Image } from "astro:assets";
-import { ArrowRight, PhoneCall, ClipboardList, Sparkles } from "@lucide/astro";
+import { ArrowRight, PhoneCall, ClipboardList, Sparkles, Phone } from "@lucide/astro";
 
 import lawnPhoto from "~/assets/lawn-brick-house.jpg";
 import { featuredServices, services } from "~/lib/services";
 import { faqs } from "~/lib/faq";
 import { localBusiness, serviceCatalog, faqPage } from "~/lib/structured-data";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
 
 const steps = [
  {
@@ -135,16 +136,41 @@ const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
  </Section>
 
  {/* ---- FAQ ---- */}
- <Section id="faq">
- <SectionHeading eyebrow="Questions" title="The things people ask first">
- Straight answers. If yours is not here, call and ask — we would rather tell
- you now than surprise you later.
- </SectionHeading>
+  <Section id="faq" band>
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div class="lg:sticky lg:top-28 lg:self-start">
+        <SectionHeading eyebrow="Questions" title="The things people ask first">
+          Straight answers. If yours is not here, call and ask — we would rather
+          tell you now than surprise you later.
+        </SectionHeading>
 
- <div class="mt-10 max-w-3xl">
- <FaqList />
- </div>
- </Section>
+        <div class="card mt-8 p-6" data-reveal>
+          <p class="font-display text-lg text-forest">Still not sure?</p>
+          <p class="mt-2 text-sm leading-relaxed text-ink-soft">
+            Tell us what the property needs and we will give you a straight
+            answer — free, with no obligation to book anything.
+          </p>
+          <div class="mt-5 flex flex-col gap-2.5">
+            <a
+              href={TEL_HREF}
+              data-track="faq-call"
+              class="btn btn-gold w-full py-3 text-sm hover:btn-gold-hover"
+            >
+              <Phone class="h-4 w-4" aria-hidden="true" />
+              {PHONE_DISPLAY}
+            </a>
+            <a href="/contact" class="btn btn-outline w-full py-3 text-sm">
+              Request an estimate
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <FaqList />
+      </div>
+    </div>
+  </Section>
 
  <CtaBand />
 </Layout>
