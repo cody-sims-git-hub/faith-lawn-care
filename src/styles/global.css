@@ -87,6 +87,9 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Root-level guard for the same sub-pixel overflow. `clip` does not create
+       a scroll container, so page-level position: sticky keeps working. */
+    overflow-x: clip;
   }
 
   body {
@@ -94,6 +97,11 @@
     color: var(--ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Guard against sub-pixel horizontal overflow (a few px from the coverage
+       map / wide cards on narrow screens). `clip` — not `hidden` — because clip
+       does not create a scroll container, so `position: sticky` inside the page
+       keeps working. */
+    overflow-x: clip;
   }
 
   h1,

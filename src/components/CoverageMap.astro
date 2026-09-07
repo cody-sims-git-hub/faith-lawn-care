@@ -22,7 +22,7 @@
  * works with no JavaScript, no pointer, and no colour vision.
  */
 import { MapPin, Clock, ArrowRight } from "@lucide/astro";
-import { areas, hub, tierLabels, tierBlurbs, type AreaTier } from "~/lib/areas";
+import { areas, hub, tierLabels, tierBlurbs, type AreaTier, hasAreaPage } from "~/lib/areas";
 import { counties } from "~/lib/counties";
 
 // ---- Projection ------------------------------------------------------------
@@ -301,7 +301,7 @@ const nodeData = nodes.map((n) => ({
  state: n.area.state,
  minutes: n.area.driveMinutes,
  tier: n.area.tier,
- hasPage: Boolean(n.area.localNote?.length),
+ hasPage: hasAreaPage(n.area.slug),
 }));
 ---
 
@@ -567,7 +567,7 @@ const nodeData = nodes.map((n) => ({
  <p class="mt-2.5 text-sm leading-relaxed text-ink-soft">{g.blurb}</p>
  <ul class="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
  {g.items.map((a) =>
- a.localNote?.length ? (
+ hasAreaPage(a.slug) ? (
  <li>
  <a
  href={`/service-areas/${a.slug}`}

@@ -15,11 +15,13 @@ import { Plus } from "@lucide/astro";
 import { faqs } from "~/lib/faq";
 
 interface Props {
-  /** Limit to the first N questions. */
+  /** Limit to the first N of the default question set. Ignored when `items` is passed. */
   limit?: number;
+  /** Explicit question set — used by the town pages to show town-specific FAQs. */
+  items?: Array<{ q: string; a: string }>;
 }
-const { limit } = Astro.props;
-const items = limit ? faqs.slice(0, limit) : faqs;
+const { limit, items: passed } = Astro.props;
+const items = passed ?? (limit ? faqs.slice(0, limit) : faqs);
 ---
 
 <div class="space-y-3" data-reveal-group data-reveal-stagger="50">
