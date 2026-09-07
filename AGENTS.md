@@ -10,13 +10,28 @@ this file is only the things that bite.
 - **Cloudflare Pages**, not Hostinger. This is a deliberate deviation from the
   starter kit's SFTP default; host rules live in `public/_headers` and
   `public/_redirects`. There is no `.htaccess` and adding one does nothing.
-- **Dark-only palette.** Tokens live once in `src/styles/global.css` on `:root`
-  with no light variant. Do not add a light theme or a `dark:` variant scheme.
+- **"Fresh & Bright" palette**, chosen by the client from four mocked
+  directions. White ground, Figtree at two weights, vivid grass green, soft
+  radii. Tokens live once in `src/styles/global.css` on `:root`; there is no
+  dark variant and no `dark:` scheme.
+
+  **The colour rule that matters:** `--field` (#1B7F3D) is the only green that
+  carries TEXT — 5.06:1 on white, and white on it is also 5.06:1, so one value
+  serves as link colour, heading accent, and filled button.
+  `--field-bright` (#2E9E4F) is a FILL/mark colour only: icons, checks,
+  swatches, borders. White on it is 3.43:1 and fails AA. If you are about to
+  put words on `--field-bright`, you want `--field`.
 - **Email-only lead capture.** Nothing is stored. Do not add a database, KV,
   D1, or a lead table — the client explicitly does not want stored leads.
-- **3D via CSS transforms + inline SVG.** Not Three.js, not a map library. The
-  audience is on rural Panhandle mobile connections and the site is held to
-  Lighthouse ≥ 90 mobile. Do not introduce a WebGL or map-tile dependency.
+- **The map is inline SVG over real Census geometry.** Not Three.js, not a map
+  library, no tiles. The audience is on rural Panhandle mobile connections and
+  the site is held to Lighthouse ≥ 90 mobile. Do not introduce a WebGL or
+  map-tile dependency.
+
+- **No decorative effects.** Pointer-tracked tilt, sheen, glows, frosted glass,
+  float/pulse animations, and hover-scale on buttons were all removed — they
+  were what made earlier passes read as machine-made. Scroll reveal is the only
+  motion. Do not reintroduce them.
 
 ## Content is data
 
