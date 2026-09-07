@@ -11,6 +11,12 @@ export const SITE_NAME = "Faith Lawn Care";
 export const LEGAL_NAME = "Faith Lawn Care LLC";
 export const OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
+/** Canonical hostname — analytics only run here, never on a preview deploy. */
+export const SITE_HOST = "faithlawncarellc.com";
+
+/** Google Analytics 4 measurement id. */
+export const GA_MEASUREMENT_ID = "G-14X6HP79Q4";
+
 /** Human-readable phone, as it appears on the truck and the flyers. */
 export const PHONE_DISPLAY = "850-209-8982";
 /** E.164, for tel: and sms: hrefs and for schema.org. */

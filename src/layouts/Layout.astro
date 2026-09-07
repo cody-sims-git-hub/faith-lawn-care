@@ -1,6 +1,12 @@
 ---
 import "~/styles/global.css";
-import { SITE_URL, SITE_NAME, OG_IMAGE } from "~/lib/site-meta";
+import {
+  SITE_URL,
+  SITE_NAME,
+  OG_IMAGE,
+  SITE_HOST,
+  GA_MEASUREMENT_ID,
+} from "~/lib/site-meta";
 import SiteHeader from "~/components/SiteHeader.astro";
 import SiteFooter from "~/components/SiteFooter.astro";
 import CallBar from "~/components/CallBar.astro";
@@ -121,5 +127,33 @@ const ogImageUrl = ogImage
  initReveal();
  }
  </script>
- </body>
+ 
+  <!--
+    Google Analytics.
+
+    Gated on the canonical hostname on purpose: Cloudflare Pages serves every
+    branch preview on a public *.pages.dev URL, and without this gate our own
+    previews — and any crawler that finds them — report as real visits. If a
+    staging domain is added later, add it here or it will record nothing.
+
+    googletagmanager.com and google-analytics.com must stay listed in the CSP in
+    public/_headers, or this loads nothing and fails silently.
+  -->
+  <script is:inline define:vars={{ gaId: GA_MEASUREMENT_ID, siteHost: SITE_HOST }}>
+    if (window.location.hostname === siteHost) {
+      var tag = document.createElement("script");
+      tag.async = true;
+      tag.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+      document.head.appendChild(tag);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      window.gtag = gtag;
+      gtag("js", new Date());
+      gtag("config", gaId);
+    }
+  </script>
+</body>
 </html>
