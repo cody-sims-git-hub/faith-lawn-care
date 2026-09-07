@@ -42,6 +42,20 @@ const nearby = content.nearby
   .map((slug) => getArea(slug))
   .filter((a): a is Area => Boolean(a));
 
+// Headings shift by tier so the copy stays honest. "Done by people who work
+// here" is true for the home county but a stretch for a coast town ninety
+// minutes out, where the real pitch is the bigger jobs and hauls.
+const introHeading = {
+  core: `Lawn care in ${area.name}, done by people who actually work here`,
+  primary: `Full-service lawn care and hauling in ${area.name}`,
+  extended: `What we make the run to ${area.name} for`,
+}[area.tier];
+
+const servicesBlurb =
+  area.tier === "extended"
+    ? `These are the jobs we most often drive to ${area.name} for — the bigger, one-time work like hauling, cleanups, and tree removal. Ask about anything else and we'll tell you straight.`
+    : `All twelve services are available in ${area.name} — these are the ones we get called for most. Mowing keeps a yard sharp; the junk and tree work is what most of our neighbors are surprised we also handle.`;
+
 const jsonLd = [
   localBusiness(),
   serviceCatalog(services),
@@ -61,7 +75,7 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <PageHeader
-    eyebrow={`${area.county} · ${area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} min from Marianna`}`}
+    eyebrow={`${area.county} · ${area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} min from Blountstown`}`}
     title={`Lawn Care & Junk Removal in ${area.name}`}
     trail={[{ name: "Service Areas", path: "/service-areas" }]}
   >
@@ -117,7 +131,7 @@ const jsonLd = [
             <div class="flex items-start gap-3">
               <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
               <div>
-                <dt class="label-caps text-ink-faint">From Marianna</dt>
+                <dt class="label-caps text-ink-faint">From Blountstown</dt>
                 <dd class="mt-0.5 text-base font-bold text-ink">
                   {area.driveMinutes === 0 ? "Home base" : `${area.driveMinutes} minutes`}
                 </dd>
@@ -150,8 +164,8 @@ const jsonLd = [
   {/* ---- Why us, framed for this town ---- */}
   <Section band size="sm">
     <SectionHeading eyebrow={`Why ${area.name} calls us`} title={`One local crew for the whole property`}>
-      No national call center, no subcontractors marked up — just a Marianna crew
-      that treats {area.name} like part of the route it is.
+      No national call center, no subcontractors marked up — just a local crew,
+      based in Blountstown, that treats {area.name} like the regular stop it is.
     </SectionHeading>
     <div class="mt-10 grid gap-5 md:grid-cols-3" data-reveal-group data-reveal-stagger="80">
       {

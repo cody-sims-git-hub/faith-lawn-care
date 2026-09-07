@@ -40,7 +40,7 @@ export const services: Service[] = [
     blurb:
       "Weekly or bi-weekly cuts with clean edges, trimmed borders, and every clipping blown off your drive.",
     summary:
-      "The service most of our customers start with: a lawn that stays cut, edged, and tidy on a schedule you never have to think about. We mow residential yards, acreage, churches, rentals, and commercial lots across Jackson, Calhoun, and Liberty counties.",
+      "The service most of our customers start with: a lawn that stays cut, edged, and tidy on a schedule you never have to think about. We mow residential yards, acreage, churches, rentals, and commercial lots across Calhoun, Liberty, and Jackson counties.",
     includes: [
       "Mow on a set weekly or bi-weekly rotation",
       "String-trim around trees, fence lines, posts, and foundations",
@@ -55,9 +55,9 @@ export const services: Service[] = [
       "Acreage is welcome. A good bit of what we mow is measured in acres, not square feet, and we are equipped for open ground as well as tight residential lots.",
     ],
     featured: true,
-    seoTitle: "Lawn Mowing in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Lawn Mowing in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Weekly and bi-weekly lawn mowing in Marianna and across Jackson, Calhoun, and Liberty counties. Edged, trimmed, and blown clean every visit.",
+      "Weekly and bi-weekly lawn mowing in Blountstown and across Calhoun, Liberty, and Jackson counties. Edged, trimmed, and blown clean every visit.",
   },
   {
     slug: "landscaping-design",
@@ -75,11 +75,11 @@ export const services: Service[] = [
       "Coordination with any construction, irrigation, or mulch work",
     ],
     body: [
-      "The single most common mistake we undo is plants that were never going to make it here. Nursery stock sold three states north goes in the ground, looks good through spring, then cooks in July or drowns in a wet week. We pick for what this region actually does: long humid heat, sandy fast-draining soil, and the occasional hard freeze that reaches Jackson County when it misses the coast.",
+      "The single most common mistake we undo is plants that were never going to make it here. Nursery stock sold three states north goes in the ground, looks good through spring, then cooks in July or drowns in a wet week. We pick for what this region actually does: long humid heat, sandy fast-draining soil, and the occasional hard freeze that reaches Calhoun County when it misses the coast.",
       "Design also means deciding what you are not going to plant. Beds that wrap the whole house look generous on paper and become a maintenance bill forever. We would rather give you two beds you love than six you resent.",
       "There is no charge to come look and talk it through.",
     ],
-    seoTitle: "Landscape Design in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Landscape Design in Blountstown, FL | Faith Lawn Care",
     seoDescription:
       "Landscape design for Jackson, Calhoun, and Liberty county properties — bed layout and plants chosen for Panhandle heat, sand, and zone 8b winters.",
   },
@@ -103,9 +103,9 @@ export const services: Service[] = [
       "Most yard problems in this part of Florida are water problems. Sand drains fast until it hits the clay layer, and then it does not — so you get a yard that is bone dry in one corner and stays soggy in another for three days after a storm. Planting into that without fixing the grade just kills more expensive plants.",
       "We would rather move dirt first and plant second. It is less satisfying on day one and it is the reason the work is still standing in year five.",
     ],
-    seoTitle: "Landscape Construction, Marianna FL | Faith Lawn Care",
+    seoTitle: "Landscape Construction, Blountstown FL | Faith Lawn Care",
     seoDescription:
-      "Bed construction, edging, stonework, sod, grading, and drainage correction across Jackson, Calhoun, and Liberty counties. Call or text 850-209-8982.",
+      "Bed construction, edging, stonework, sod, grading, and drainage correction across Calhoun, Liberty, and Jackson counties. Call or text 850-209-8982.",
   },
   {
     slug: "seasonal-cleanups",
@@ -129,9 +129,9 @@ export const services: Service[] = [
       "After a summer storm we run cleanup as its own call — see junk and debris removal below.",
     ],
     featured: true,
-    seoTitle: "Spring & Fall Yard Cleanup in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Yard Cleanups in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Seasonal yard cleanups across Jackson, Calhoun, and Liberty counties — leaves, pine straw, storm limbs, and bed cutback, all hauled away. Call 850-209-8982.",
+      "Seasonal yard cleanups across Calhoun, Liberty, and Jackson counties — leaves, pine straw, storm limbs, and bed cutback, all hauled away. Call 850-209-8982.",
   },
   {
     slug: "lawn-restoration",
@@ -153,9 +153,9 @@ export const services: Service[] = [
       "Almost every dead lawn we are called out to has a cause that will kill the replacement too. Laying fresh sod over compacted ground, or into a low spot that holds water, buys about one season. The diagnosis is the valuable half of this service.",
       "Chinch bugs are the usual culprit in St. Augustine here, and they get blamed for drought damage they did not cause — and vice versa. The two look similar from the porch and need opposite responses. We check before we treat.",
     ],
-    seoTitle: "Lawn Restoration & Repair in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Lawn Restoration in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Lawn restoration across Jackson, Calhoun, and Liberty counties — we diagnose what killed it, fix the cause, then rebuild the turf. Call or text 850-209-8982.",
+      "Lawn restoration across Calhoun, Liberty, and Jackson counties — we diagnose what killed it, fix the cause, then rebuild the turf. Call or text 850-209-8982.",
   },
   {
     slug: "fertilization-weed-control",
@@ -179,9 +179,9 @@ export const services: Service[] = [
       "Dollarweed is the tell for a drainage problem. If we are treating it every visit, we will say so and point at the actual cause instead of selling you another round.",
     ],
     featured: true,
-    seoTitle: "Fertilization & Weed Control, Marianna FL | Faith Lawn Care",
+    seoTitle: "Lawn Fertilization in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Fertilization and weed control for centipede, St. Augustine, and bahia lawns across Jackson, Calhoun, and Liberty counties, timed to our season.",
+      "Fertilization and weed control for centipede, St. Augustine, and bahia lawns across Calhoun, Liberty, and Jackson counties, timed to our season.",
   },
   {
     slug: "mulch-application",
@@ -202,9 +202,9 @@ export const services: Service[] = [
       "Depth is the whole job. Under two inches and weeds come straight through, so you pay again in six weeks. Piled against trunks — the volcano you see around so many yard trees — and you trap moisture against the bark and invite rot.",
       "Pine straw is the regional default for good reason: it is cheap here, it stays put on a slope better than bark, and it suits the acid-loving plants most of these yards already have. Bark mulch lasts longer and looks sharper up close. We will price both.",
     ],
-    seoTitle: "Mulch & Pine Straw, Marianna FL | Faith Lawn Care",
+    seoTitle: "Mulch & Pine Straw, Blountstown FL | Faith Lawn Care",
     seoDescription:
-      "Mulch and pine straw installation across Jackson, Calhoun, and Liberty counties — beds weeded and edged first, laid at proper depth. Call 850-209-8982.",
+      "Mulch and pine straw installation across Calhoun, Liberty, and Jackson counties — beds weeded and edged first, laid at proper depth. Call 850-209-8982.",
   },
   {
     slug: "hedge-trimming",
@@ -225,9 +225,9 @@ export const services: Service[] = [
       "Timing decides whether you get flowers. Azaleas set next spring's buds within weeks of finishing this spring's bloom — shear them in fall and you have cut off the entire show before it started. We prune spring bloomers right after they finish and save the hard cuts for the ones that can take it.",
       "For badly overgrown hedges, taking it all in one pass often kills the plant. We usually stage a heavy reduction across two seasons so it comes back full rather than bare and woody.",
     ],
-    seoTitle: "Hedge & Shrub Trimming in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Hedge & Shrub Trimming in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Hedge trimming and shrub shaping in Jackson, Calhoun, and Liberty counties — pruned in the right season so bloomers still bloom. Call or text 850-209-8982.",
+      "Hedge trimming and shrub shaping in Calhoun, Liberty, and Jackson counties — pruned in the right season so bloomers still bloom. Call or text 850-209-8982.",
   },
   {
     slug: "irrigation",
@@ -250,9 +250,9 @@ export const services: Service[] = [
       "Watering in the evening is the other one. Grass that goes into a humid Florida night wet is grass that grows fungus. Early morning is the window.",
       "In sand, water moves down and out fast. Runtimes that are right for clay soil elsewhere overshoot here — much of it drains past the roots before the grass can use it.",
     ],
-    seoTitle: "Sprinkler Repair in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Sprinkler Repair in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Irrigation repair, head replacement, and seasonal scheduling across Jackson, Calhoun, and Liberty counties. Stop watering the driveway. Call 850-209-8982.",
+      "Irrigation repair, head replacement, and seasonal scheduling across Calhoun, Liberty, and Jackson counties. Stop watering the driveway. Call 850-209-8982.",
   },
   {
     slug: "tree-removal",
@@ -271,12 +271,12 @@ export const services: Service[] = [
     ],
     body: [
       "After every named storm that tracks through this county we get calls about trees that have been leaning for years. A tree that shifted in a storm has usually broken roots on one side, and it will not straighten out — the next strong wind finishes it, and where it lands is not up to you.",
-      "Water oaks and laurel oaks are the ones to watch here. They grow fast, they are everywhere in Marianna, and they get structurally hollow far earlier than a live oak while still looking healthy in full leaf.",
+      "Water oaks and laurel oaks are the ones to watch here. They grow fast, they are everywhere around Blountstown, and they get structurally hollow far earlier than a live oak while still looking healthy in full leaf.",
       "Anything near a power line is a utility call, not ours, and we will tell you that plainly rather than take the job.",
     ],
-    seoTitle: "Tree Removal in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Tree Removal in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Tree and limb removal across Jackson, Calhoun, and Liberty counties — dead, leaning, and storm-damaged trees taken down and hauled off. Call 850-209-8982.",
+      "Tree and limb removal across Calhoun, Liberty, and Jackson counties — dead, leaning, and storm-damaged trees taken down and hauled off. Call 850-209-8982.",
   },
   {
     slug: "pressure-washing",
@@ -300,9 +300,9 @@ export const services: Service[] = [
       "A washed driveway is the single cheapest thing you can do to a house before it goes on the market.",
     ],
     featured: true,
-    seoTitle: "Pressure Washing in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Pressure Washing in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Pressure washing and soft washing for driveways, siding, decks, and roofs across Jackson, Calhoun, and Liberty counties. Call or text 850-209-8982.",
+      "Pressure washing and soft washing for driveways, siding, decks, and roofs across Calhoun, Liberty, and Jackson counties. Call or text 850-209-8982.",
   },
   {
     slug: "junk-removal",
@@ -328,9 +328,9 @@ export const services: Service[] = [
       "Anything that can be donated or scrapped, we route that way rather than straight to a landfill.",
     ],
     featured: true,
-    seoTitle: "Junk Removal & Hauling in Marianna, FL | Faith Lawn Care",
+    seoTitle: "Junk Removal & Hauling in Blountstown, FL | Faith Lawn Care",
     seoDescription:
-      "Junk removal and hauling across Jackson, Calhoun, and Liberty counties — appliances, furniture, cleanouts, and storm debris. We load it. Call 850-209-8982.",
+      "Junk removal and hauling across Calhoun, Liberty, and Jackson counties — appliances, furniture, cleanouts, and storm debris. We load it. Call 850-209-8982.",
   },
 ];
 

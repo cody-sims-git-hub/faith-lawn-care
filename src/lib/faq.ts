@@ -14,7 +14,7 @@ export const faqs = [
   },
   {
     q: "How far do you travel?",
-    a: "Jackson County is our home ground and we are there weekly. We run scheduled routes into Calhoun and Liberty counties, and we will travel up to about two hours for larger jobs — cleanups, hauls, and tree work. If you are not sure whether you are in range, call and ask; we will tell you straight.",
+    a: "Calhoun County is our home ground and we are there weekly. We run scheduled routes into the surrounding Jackson, Liberty, and Gadsden counties, and we will travel up to about two hours for larger jobs — cleanups, hauls, and tree work. If you are not sure whether you are in range, call and ask; we will tell you straight.",
   },
   {
     q: "Do you do one-time jobs, or only regular service?",
@@ -38,6 +38,6 @@ export const faqs = [
   },
   {
     q: "How soon can you get out here?",
-    a: "For most of Jackson County, usually within a few days — often sooner. Calhoun and Liberty run on set days, so timing depends on the rotation. Storm cleanup gets prioritized. Call or text and we will give you a real date, not a maybe.",
+    a: "For most of Calhoun County, usually within a few days — often sooner. The surrounding counties run on set days, so timing depends on the rotation. Storm cleanup gets prioritized. Call or text and we will give you a real date, not a maybe.",
   },
 ] as const;

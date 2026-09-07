@@ -30,13 +30,13 @@ export const SMS_HREF = `sms:${PHONE_E164}`;
  * storefront address to publish. `areaServed` in the JSON-LD carries the
  * coverage instead, and the base city anchors local relevance.
  */
-export const BASE_CITY = "Marianna";
+export const BASE_CITY = "Blountstown";
 export const BASE_STATE = "Florida";
 export const BASE_STATE_CODE = "FL";
-export const BASE_COUNTY = "Jackson County";
+export const BASE_COUNTY = "Calhoun County";
 
-/** Approximate centroid of Marianna, FL — used for the geo JSON-LD only. */
-export const GEO = { lat: 30.774, lng: -85.2269 };
+/** Approximate centroid of Blountstown, FL — used for the geo JSON-LD only. */
+export const GEO = { lat: 30.4438, lng: -85.0466 };
 
 export const FACEBOOK_URL = "https://www.facebook.com/groups/778218776391066";
 

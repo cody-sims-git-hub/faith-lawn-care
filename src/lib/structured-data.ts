@@ -40,7 +40,7 @@ export function localBusiness() {
     telephone: PHONE_E164,
     image: OG_IMAGE,
     description:
-      "Full-service lawn care, landscaping, and junk removal serving Marianna and the surrounding Jackson, Calhoun, and Liberty county communities.",
+      "Full-service lawn care, landscaping, and junk removal serving Blountstown and the surrounding Calhoun, Liberty, and Jackson county communities.",
     priceRange: "$$",
     sameAs: [FACEBOOK_URL],
     // No streetAddress: this is a mobile service with no storefront. The city
