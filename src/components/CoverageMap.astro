@@ -130,7 +130,7 @@ const shapes = counties
  .sort((a, b) => b.maxLat - a.maxLat);
 
 /** County names printed on the plate — the ones we name in copy. */
-const NAMED_COUNTIES = new Set(["Jackson", "Calhoun", "Liberty"]);
+const NAMED_COUNTIES = new Set(["Calhoun", "Liberty", "Jackson"]);
 
 // ---- Towns -----------------------------------------------------------------
 const tierRadius: Record<AreaTier, number> = { core: 6, primary: 5.5, extended: 4.5 };
@@ -152,7 +152,7 @@ const hubNode = nodes.find((n) => n.area.slug === hub.slug)!;
 const spokes = nodes.filter((n) => n.area.slug !== hub.slug);
 
 /**
- * County name plates. Marianna sits almost exactly on Jackson County's
+ * County name plates. Blountstown sits almost exactly on Calhoun County's
  * centroid, so a name printed there lands underneath the map pin — push any
  * label that would collide with the pin down into clear space instead.
  */
@@ -173,7 +173,7 @@ const countyLabels = shapes
  });
 
 // ---- Label placement -------------------------------------------------------
-// Around Marianna the towns are genuinely close together, so labels placed
+// Around Blountstown the towns are genuinely close together, so labels placed
 // naively all centred above their dot overlap into an unreadable pile — exactly
 // where the map matters most. Positions are known at build time, so this
 // greedily tries a ring of candidate offsets per label and takes the first that
@@ -211,7 +211,7 @@ const dotBoxes: Box[] = nodes.map((n) => ({
 
 const placedBoxes: Box[] = [];
 
-// The Marianna pin and its wordmark claim their space first — both are far
+// The Blountstown pin and its wordmark claim their space first — both are far
 // bigger than a town dot. Reserving a town-sized box here is what previously
 // let a neighbouring label print straight through the pin.
 placedBoxes.push(
@@ -413,7 +413,7 @@ const nodeData = nodes.map((n) => ({
  ))
  }
 
- {/* Marianna — a surveyor's marker, not another dot */}
+ {/* Blountstown — a surveyor's marker, not another dot */}
  <g
  x-on:mouseenter={`selected = '${hub.slug}'`}
  x-on:click={`selected = '${hub.slug}'`}
@@ -436,8 +436,8 @@ const nodeData = nodes.map((n) => ({
  font-weight="700"
  style={`font-family: var(--font-display); letter-spacing: 0.02em; paint-order: stroke; stroke: ${PAPER}; stroke-width: 5px; stroke-linejoin: round;`}
  >
- Marianna
- </text>
+              Blountstown
+            </text>
  </g>
 
  {/* Scale bar */}
@@ -511,7 +511,7 @@ const nodeData = nodes.map((n) => ({
  <div class="flex items-start gap-3">
  <Clock class="mt-0.5 h-5 w-5 shrink-0 text-grass" aria-hidden="true" />
  <div>
- <dt class="label-caps text-ink-faint">Drive time from Marianna</dt>
+ <dt class="label-caps text-ink-faint">Drive time from Blountstown</dt>
  <dd class="mt-0.5 text-base font-bold text-ink">
  <template x-if="town.minutes === 0">
  <span>Home base</span>

@@ -1,63 +1,57 @@
 ---
 /**
- * Bottom-right quote popup, shown five seconds after load.
+ * Bottom-right quote popup — an attention-getter that nudges a new visitor to
+ * connect, in the spirit of the "Hi there!" chat bubble on a lot of local
+ * service sites.
  *
- * Posts to the same /api/quote Pages Function as the full form, so there is one
- * lead path and one place where delivery can break. Nothing is stored.
+ * Behaviour:
+ *   - A small "Free estimate" bubble sits in the corner from the start.
+ *   - ~5s after landing it expands, once, into the full quick-quote form.
+ *   - Closing it collapses back to the bubble — it does NOT fully go away, so
+ *     the visitor can reopen it any time.
+ *   - It won't auto-expand again in the same session (sessionStorage), so it
+ *     nudges without nagging, but a fresh visit pops it again.
+ *   - It never appears on /contact, where the full form is already on screen.
+ *   - Escape collapses it; focus moves into the panel on open.
+ *   - On mobile it sits ABOVE the sticky call bar so the phone button is clear.
  *
- * Behaviour rules, because an uninvited popup is easy to make hostile:
- *   - It appears once. Dismissing or submitting sets a localStorage flag and it
- *     stays gone; it does not reappear on the next page or the next visit.
- *   - It never opens on /contact, where the real form is already on screen, and
- *     it never opens if the visitor has already scrolled past the fold — at
- *     that point they are reading, and interrupting is worse than waiting.
- *   - Escape closes it. Focus moves to the panel on open and back to the page
- *     on close, so it is operable from the keyboard.
- *   - It respects prefers-reduced-motion by skipping the entrance animation.
- *   - On mobile it sits ABOVE the sticky call bar rather than over it, so the
- *     phone button is never covered.
- *
- * The panel carries focus:outline-none because it is focused programmatically
- * on open, so a screen reader lands inside it. It is a container, not a control,
- * and the global gold focus ring otherwise drew a border around the whole
- * popup. Every control within it keeps its own visible focus state.
+ * Posts to the same /api/quote Pages Function as the full form — one lead path,
+ * one place delivery can break. Nothing is stored.
  */
-import { X, Phone } from "@lucide/astro";
+import { X, Phone, MessageSquareText } from "@lucide/astro";
 import { services } from "~/lib/services";
 import { contactConfig } from "~/lib/contact-config";
 import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
 
 const { endpoint } = contactConfig;
 const DELAY_MS = 5000;
-const STORAGE_KEY = "flc.quotePopup.dismissed";
+const SESSION_KEY = "flc.quotePopup.autoOpened";
 ---
 
 <div
   x-data={`{
     open: false,
+    onContact: false,
     status: 'idle',
     error: '',
     init() {
-      // Never on the contact page — the full form is already there.
-      if (window.location.pathname.replace(/\\/$/, '') === '/contact') return;
-      try {
-        if (localStorage.getItem('${STORAGE_KEY}')) return;
-      } catch (e) { /* private mode: fall through and just show it */ }
-
+      this.onContact = window.location.pathname.replace(/\\/$/, '') === '/contact';
+      if (this.onContact) return;
+      // Auto-expand once per session, so it nudges without nagging.
+      let already = false;
+      try { already = !!sessionStorage.getItem('${SESSION_KEY}'); } catch (e) {}
+      if (already) return;
       setTimeout(() => {
-        // If they have started reading, do not interrupt.
-        if (window.scrollY > window.innerHeight * 0.9) return;
         this.open = true;
-        this.$nextTick(() => this.$refs.panel?.focus());
+        try { sessionStorage.setItem('${SESSION_KEY}', '1'); } catch (e) {}
+        this.$nextTick(() => this.$refs.panel && this.$refs.panel.focus());
       }, ${DELAY_MS});
     },
-    remember() {
-      try { localStorage.setItem('${STORAGE_KEY}', '1'); } catch (e) { /* ignore */ }
+    show() {
+      this.open = true;
+      this.$nextTick(() => this.$refs.panel && this.$refs.panel.focus());
     },
-    close() {
-      this.open = false;
-      this.remember();
-    },
+    close() { this.open = false; },
     async submit(event) {
       const form = event.target;
       if (!form.reportValidity()) return;
@@ -72,7 +66,6 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || 'Something went wrong.');
         this.status = 'sent';
-        this.remember();
       } catch (err) {
         this.status = 'error';
         this.error = err.message || 'Something went wrong.';
@@ -81,10 +74,26 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
   }`}
   x-on:keydown.escape.window="open && close()"
 >
+  {/* ---- Minimized bubble (always available to reopen) ---- */}
+  <button
+    type="button"
+    x-show="!open && !onContact"
+    x-cloak
+    x-transition
+    x-on:click="show()"
+    data-track="popup-bubble"
+    class="group fixed bottom-[5.5rem] right-3 z-40 inline-flex items-center gap-2 rounded-full bg-gold px-5 py-3.5 text-sm font-extrabold text-forest-deep shadow-[var(--shadow-float)] transition-transform hover:scale-[1.03] motion-safe:animate-[pop-in_0.4s_ease] sm:bottom-5 sm:right-5"
+    aria-label="Open the free estimate form"
+  >
+    <MessageSquareText class="h-5 w-5" aria-hidden="true" />
+    Free estimate
+  </button>
+
+  {/* ---- Expanded form panel ---- */}
   <div
     x-show="open"
     x-cloak
-    x-transition.opacity.duration.250ms
+    x-transition.opacity.duration.200ms
     x-ref="panel"
     tabindex="-1"
     role="dialog"
@@ -93,15 +102,10 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
     class="fixed bottom-[5.5rem] right-3 z-40 w-[min(23rem,calc(100vw-1.5rem))] focus:outline-none sm:bottom-5 sm:right-5"
   >
     <div class="card animate-pop-in overflow-hidden shadow-[var(--shadow-float)]">
-      {/* Header */}
       <div class="flex items-start justify-between gap-3 bg-forest px-5 py-4">
         <div>
-          <p id="quote-popup-title" class="font-display text-lg text-white">
-            Free estimate
-          </p>
-          <p class="mt-0.5 text-xs text-on-dark-soft">
-            Tell us where and we&rsquo;ll call you back
-          </p>
+          <p id="quote-popup-title" class="font-display text-lg text-white">Free estimate</p>
+          <p class="mt-0.5 text-xs text-on-dark-soft">Tell us where and we&rsquo;ll call you back</p>
         </div>
         <button
           type="button"
@@ -113,7 +117,6 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
         </button>
       </div>
 
-      {/* Sent */}
       <template x-if="status === 'sent'">
         <div class="px-5 py-7 text-center">
           <p class="font-display text-lg text-forest">Got it — thanks.</p>
@@ -127,7 +130,6 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
         </div>
       </template>
 
-      {/* Form */}
       <form
         x-show="status !== 'sent'"
         method="POST"
@@ -137,48 +139,19 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
       >
         <div>
           <label for="popup-name" class="sr-only">Your name</label>
-          <input
-            id="popup-name"
-            name="name"
-            type="text"
-            required
-            autocomplete="name"
-            placeholder="Your name"
-            class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none"
-          />
+          <input id="popup-name" name="name" type="text" required autocomplete="name" placeholder="Your name" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
         </div>
         <div>
           <label for="popup-phone" class="sr-only">Phone</label>
-          <input
-            id="popup-phone"
-            name="phone"
-            type="tel"
-            required
-            autocomplete="tel"
-            inputmode="tel"
-            placeholder="Phone"
-            class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none"
-          />
+          <input id="popup-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" placeholder="Phone" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
         </div>
         <div>
           <label for="popup-town" class="sr-only">Town</label>
-          <input
-            id="popup-town"
-            name="town"
-            type="text"
-            required
-            autocomplete="address-level2"
-            placeholder="Town"
-            class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none"
-          />
+          <input id="popup-town" name="town" type="text" required autocomplete="address-level2" placeholder="Town" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
         </div>
         <div>
           <label for="popup-service" class="sr-only">What do you need?</label>
-          <select
-            id="popup-service"
-            name="service"
-            class="w-full rounded-sm border border-rule-strong bg-paper px-3.5 py-2.5 text-sm text-ink focus:border-grass focus:outline-none"
-          >
+          <select id="popup-service" name="service" class="w-full rounded-sm border border-rule-strong bg-paper px-3.5 py-2.5 text-sm text-ink focus:border-grass focus:outline-none">
             <option value="">What do you need?</option>
             {services.map((s) => <option value={s.name}>{s.name}</option>)}
           </select>
@@ -189,25 +162,13 @@ const STORAGE_KEY = "flc.quotePopup.dismissed";
           <label for="popup-company">Company (leave blank)</label>
           <input id="popup-company" name="company" type="text" tabindex="-1" autocomplete="off" />
         </div>
-
         <input type="hidden" name="source" value="popup" />
 
-        <button
-          type="submit"
-          x-bind:disabled="status === 'sending'"
-          class="btn btn-gold w-full py-3 text-sm hover:btn-gold-hover disabled:opacity-60"
-        >
-          <span x-text="status === 'sending' ? 'Sending…' : 'Request my estimate'">
-            Request my estimate
-          </span>
+        <button type="submit" x-bind:disabled="status === 'sending'" class="btn btn-gold w-full py-3 text-sm hover:btn-gold-hover disabled:opacity-60">
+          <span x-text="status === 'sending' ? 'Sending…' : 'Request my estimate'">Request my estimate</span>
         </button>
 
-        <p
-          x-show="status === 'error'"
-          x-cloak
-          role="alert"
-          class="text-xs leading-relaxed text-red-700"
-        >
+        <p x-show="status === 'error'" x-cloak role="alert" class="text-xs leading-relaxed text-red-700">
           <span x-text="error"></span> You can always call
           <a href={TEL_HREF} class="font-bold underline">{PHONE_DISPLAY}</a>.
         </p>
