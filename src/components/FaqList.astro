@@ -18,7 +18,7 @@ const { limit } = Astro.props;
 const items = limit ? faqs.slice(0, limit) : faqs;
 ---
 
-<div class="divide-y divide-rule/70 border-y border-rule/70" data-reveal-group>
+<div class="divide-y divide-rule/70 border-y border-rule" data-reveal-group>
  {
  items.map((faq) => (
  <details class="group py-1" data-reveal="fade">

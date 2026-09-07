@@ -1,62 +1,63 @@
 ---
+/**
+ * Interior page header: breadcrumb, eyebrow, h1, and a short lede.
+ *
+ * Sits on the mist band rather than carrying its own gradient. An earlier
+ * version painted a radial green wash here, which was both a leftover from a
+ * rejected palette and the kind of ambient glow this direction deliberately
+ * does without.
+ */
 import { ChevronRight } from "@lucide/astro";
 
 interface Props {
- eyebrow?: string;
- title: string;
- /** Breadcrumb trail, excluding Home (added automatically) and the current page. */
- trail?: Array<{ name: string; path: string }>;
+  eyebrow?: string;
+  title: string;
+  /** Breadcrumb trail, excluding Home (added automatically) and the current page. */
+  trail?: Array<{ name: string; path: string }>;
 }
 const { eyebrow, title, trail = [] } = Astro.props;
 ---
 
-<section class="relative isolate overflow-hidden border-b border-rule/70">
- <div
- class="absolute inset-0 -z-10"
- style="background: radial-gradient(80% 120% at 20% 0%, oklch(0.79 0.178 133 / 0.13), transparent 60%);"
- aria-hidden="true"
- >
- </div>
+<section class="border-b border-rule bg-paper-sunk">
+  <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+    <nav aria-label="Breadcrumb" class="mb-6">
+      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-ink-soft">
+        <li><a href="/" class="hover:text-field">Home</a></li>
+        {
+          trail.map((step) => (
+            <>
+              <li aria-hidden="true">
+                <ChevronRight class="h-3.5 w-3.5 text-ink-faint" />
+              </li>
+              <li>
+                <a href={step.path} class="hover:text-field">
+                  {step.name}
+                </a>
+              </li>
+            </>
+          ))
+        }
+        <li aria-hidden="true">
+          <ChevronRight class="h-3.5 w-3.5 text-ink-faint" />
+        </li>
+        <li class="font-bold text-ink" aria-current="page">{title}</li>
+      </ol>
+    </nav>
 
- <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
- <nav aria-label="Breadcrumb" class="mb-6">
- <ol class="flex flex-wrap items-center gap-1.5 text-sm text-ink-soft">
- <li><a href="/" class="hover:text-ink">Home</a></li>
- {
- trail.map((step) => (
- <>
- <li aria-hidden="true">
- <ChevronRight class="h-3.5 w-3.5" />
- </li>
- <li>
- <a href={step.path} class="hover:text-ink">
- {step.name}
- </a>
- </li>
- </>
- ))
- }
- <li aria-hidden="true">
- <ChevronRight class="h-3.5 w-3.5" />
- </li>
- <li class="font-semibold text-ink" aria-current="page">{title}</li>
- </ol>
- </nav>
+    {eyebrow && <p class="pill mb-4">{eyebrow}</p>}
 
- {
- eyebrow && (
- <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-field">
- {eyebrow}
- </p>
- )
- }
+    {/*
+      The h1 and the lede share one measure. Letting the heading run to
+      max-w-4xl while the lede stopped at max-w-2xl left a wide empty gutter
+      on every interior page, which read as an unfinished layout rather than
+      as breathing room.
+    */}
+    <div class="max-w-3xl">
+      <h1 class="text-4xl leading-[1.05] sm:text-5xl">{title}</h1>
 
- <h1 class="max-w-4xl text-balance font-display text-5xl leading-[1] sm:text-6xl">
- {title}
- </h1>
-
- <div class="mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft">
- <slot />
- </div>
- </div>
+      <div class="mt-5 text-lg leading-relaxed text-ink-soft">
+        <slot />
+      </div>
+    </div>
+  </div>
 </section>

@@ -19,7 +19,7 @@ const year = new Date().getFullYear();
 const coreAreas = areasByTier("core");
 ---
 
-<footer class="border-t border-rule/70 bg-paper">
+<footer class="border-t border-rule bg-paper">
  <div class="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
  <div class="lg:col-span-1">
  <Logo />
@@ -100,7 +100,7 @@ const coreAreas = areasByTier("core");
  {
  HOURS.map((h) => (
  <li class="flex items-start gap-2 text-sm text-ink-soft">
- <Clock class="mt-0.5 h-4 w-4 shrink-0 text-field/70" aria-hidden="true" />
+ <Clock class="mt-0.5 h-4 w-4 shrink-0 text-field" aria-hidden="true" />
  <span>
  <span class="text-ink">{h.days}</span>
  <br />
@@ -110,14 +110,14 @@ const coreAreas = areasByTier("core");
  ))
  }
  <li class="flex items-start gap-2 pt-1 text-sm text-ink-soft">
- <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-field/70" aria-hidden="true" />
+ <MapPin class="mt-0.5 h-4 w-4 shrink-0 text-field" aria-hidden="true" />
  <span>Based in {BASE_CITY}, {BASE_STATE_CODE} — we come to you</span>
  </li>
  </ul>
  </div>
  </div>
 
- <div class="border-t border-rule/70">
+ <div class="border-t border-rule">
  <div
  class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between sm:px-6"
  >

@@ -6,7 +6,7 @@ import ServiceCard from "~/components/ServiceCard.astro";
 import FaqList from "~/components/FaqList.astro";
 import CtaBand from "~/components/CtaBand.astro";
 import { Clock, MapPin } from "@lucide/astro";
-import { areasWithPages, tierLabels, tierBlurbs, type Area } from "~/lib/areas";
+import { areasWithPages, tierLabels, tierBlurbs, type Area, hub } from "~/lib/areas";
 import { services, featuredServices } from "~/lib/services";
 import { localBusiness, breadcrumbs, serviceCatalog } from "~/lib/structured-data";
 import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
@@ -48,9 +48,21 @@ const jsonLd = [
  title={`Lawn Care in ${area.name}`}
  trail={[{ name: "Service Areas", path: "/service-areas" }]}
  >
- Full-service lawn care, landscaping, and junk removal for {area.name} and the
- surrounding area — the same crew and the same standard we run at home in
- Marianna.
+ {
+ area.slug === hub.slug ? (
+ <>
+ Home base. Full-service lawn care, landscaping, and junk removal across
+ {" "}{area.name} and the rest of {area.county} — this is where we are most
+ days.
+ </>
+ ) : (
+ <>
+ Full-service lawn care, landscaping, and junk removal for {area.name} and
+ the surrounding area — the same crew and the same standard we run at home
+ in Marianna.
+ </>
+ )
+ }
  </PageHeader>
 
  <Section>
@@ -99,7 +111,7 @@ const jsonLd = [
  </div>
  </dl>
 
- <p class="mt-5 border-t border-rule/60 pt-5 text-sm leading-relaxed text-ink-soft">
+ <p class="mt-5 border-t border-rule pt-5 text-sm leading-relaxed text-ink-soft">
  {tierBlurbs[area.tier]}
  </p>
 
