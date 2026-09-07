@@ -1,0 +1,630 @@
+---
+/**
+ * Coverage map — a real map of the counties this business works in.
+ *
+ * The shapes are actual US Census county boundaries (see src/lib/counties.ts),
+ * projected at build time with an equirectangular projection whose X axis is
+ * scaled by cos(latitude) so the Panhandle is not stretched sideways. Towns sit
+ * at their true WGS84 positions.
+ *
+ * The 3D is an extrusion, done in SVG: every county is drawn twice — a dark
+ * side wall offset downward, then the top face over it — and the whole plate is
+ * tilted with a CSS transform. Counties paint north-to-south so a southern
+ * county correctly occludes the wall of the one behind it. No WebGL, no map
+ * tiles, no runtime dependency, which on a rural mobile connection is the
+ * difference between a map and a blank rectangle.
+ *
+ * Accessibility and crawlers: the SVG is aria-hidden and purely visual. The
+ * authoritative content is the grouped town list rendered underneath, which
+ * works with no JavaScript, no pointer, and no colour vision.
+ */
+import { MapPin, Clock, ArrowRight } from "@lucide/astro";
+import { areas, hub, tierLabels, tierBlurbs, type AreaTier } from "~/lib/areas";
+import { counties } from "~/lib/counties";
+
+// ---- Projection ------------------------------------------------------------
+const COS_LAT = Math.cos((30.6 * Math.PI) / 180);
+const projX = (lng: number) => lng * COS_LAT;
+const projY = (lat: number) => -lat; // negate so north is up in SVG's y-down space
+
+const allPoints = counties.flatMap((c) => c.rings.flat());
+const minX = Math.min(...allPoints.map((p) => projX(p[0])));
+const maxX = Math.max(...allPoints.map((p) => projX(p[0])));
+const minY = Math.min(...allPoints.map((p) => projY(p[1])));
+const maxY = Math.max(...allPoints.map((p) => projY(p[1])));
+
+const WIDTH = 1000;
+const PAD_X = 40;
+const PAD_TOP = 52;
+const PAD_BOTTOM = 78; // room for the extrusion depth and the scale bar
+const inner = WIDTH - PAD_X * 2;
+const scale = inner / (maxX - minX);
+const HEIGHT = Math.round((maxY - minY) * scale + PAD_TOP + PAD_BOTTOM);
+
+const sx = (lng: number) => PAD_X + (projX(lng) - minX) * scale;
+const sy = (lat: number) => PAD_TOP + (projY(lat) - minY) * scale;
+
+/** Extrusion depth, in projected px. */
+const DEPTH = 13;
+
+// ---- County tiers ----------------------------------------------------------
+// A county's tier is the best tier of any town we serve in it, so the map's
+// colour and the town list can never disagree.
+const tierRank: Record<AreaTier, number> = { core: 0, primary: 1, extended: 2 };
+
+const countyTier = new Map<string, AreaTier>();
+for (const area of areas) {
+  const key = area.county.replace(/ County$/, "");
+  const current = countyTier.get(key);
+  if (!current || tierRank[area.tier] < tierRank[current]) {
+    countyTier.set(key, area.tier);
+  }
+}
+
+const tierFill: Record<AreaTier, string> = {
+  core: "oklch(0.79 0.178 133 / 0.42)",
+  primary: "oklch(0.72 0.13 160 / 0.28)",
+  extended: "oklch(0.64 0.08 195 / 0.16)",
+};
+const tierStroke: Record<AreaTier, string> = {
+  core: "oklch(0.88 0.19 130 / 0.95)",
+  primary: "oklch(0.78 0.14 163 / 0.75)",
+  extended: "oklch(0.68 0.09 196 / 0.5)",
+};
+const tierWall: Record<AreaTier, string> = {
+  core: "oklch(0.42 0.11 138)",
+  primary: "oklch(0.34 0.07 162)",
+  extended: "oklch(0.27 0.035 196)",
+};
+
+// Counties with no town we serve — drawn as neutral context so the shape of the
+// region reads, without implying coverage. These must stay clearly LIGHTER than
+// the page background: too dark and they read as holes punched in the map
+// rather than as neighbouring land.
+const CONTEXT_FILL = "oklch(0.32 0.015 160 / 0.85)";
+const CONTEXT_STROKE = "oklch(0.52 0.02 160 / 0.55)";
+const CONTEXT_WALL = "oklch(0.25 0.012 160)";
+
+const toPath = (ring: Array<[number, number]>, dy = 0): string =>
+  `${ring
+    .map(
+      ([lng, lat], i) =>
+        `${i === 0 ? "M" : "L"}${sx(lng).toFixed(1)},${(sy(lat) + dy).toFixed(1)}`,
+    )
+    .join("")}Z`;
+
+const shapes = counties
+  .map((county) => {
+    const tier = countyTier.get(county.name);
+    const ring = county.rings[0];
+    const centroidLat = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+    const centroidLng = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+    return {
+      county,
+      tier,
+      top: county.rings.map((r) => toPath(r)).join(" "),
+      wall: county.rings.map((r) => toPath(r, DEPTH)).join(" "),
+      maxLat: Math.max(...county.rings.flat().map((p) => p[1])),
+      cx: sx(centroidLng),
+      cy: sy(centroidLat),
+      fill: tier ? tierFill[tier] : CONTEXT_FILL,
+      stroke: tier ? tierStroke[tier] : CONTEXT_STROKE,
+      wallFill: tier ? tierWall[tier] : CONTEXT_WALL,
+    };
+  })
+  // Painter's algorithm for a view tilted from the south: draw the northernmost
+  // county first so southern neighbours occlude its wall.
+  .sort((a, b) => b.maxLat - a.maxLat);
+
+/** County names worth printing on the plate — the ones we name in copy. */
+const NAMED_COUNTIES = new Set(["Jackson", "Calhoun", "Liberty"]);
+
+// ---- Towns -----------------------------------------------------------------
+const tierRadius: Record<AreaTier, number> = { core: 7, primary: 6.5, extended: 5 };
+
+interface Node {
+  area: (typeof areas)[number];
+  x: number;
+  y: number;
+  r: number;
+}
+const nodes: Node[] = areas.map((area) => ({
+  area,
+  x: sx(area.lng),
+  y: sy(area.lat),
+  r: tierRadius[area.tier],
+}));
+
+const hubNode = nodes.find((n) => n.area.slug === hub.slug)!;
+const spokes = nodes.filter((n) => n.area.slug !== hub.slug);
+
+/**
+ * County name plates. Marianna sits almost exactly on Jackson County's
+ * centroid, so a name printed there lands underneath the map pin — push any
+ * label that would collide with the pin down into clear space instead.
+ */
+const PIN_GUARD = { x: 78, up: 52, down: 14 };
+const countyLabels = shapes
+  .filter((s) => s.tier && NAMED_COUNTIES.has(s.county.name))
+  .map((s) => {
+    const clashesWithPin =
+      Math.abs(s.cx - hubNode.x) < PIN_GUARD.x &&
+      s.cy > hubNode.y - PIN_GUARD.up &&
+      s.cy < hubNode.y + PIN_GUARD.down;
+    return {
+      name: s.county.name.toUpperCase(),
+      x: s.cx,
+      y: clashesWithPin ? hubNode.y + 46 : s.cy,
+      // The core county's fill is bright, so its own stroke colour has too
+      // little contrast to read on it. Use a dark ink there instead.
+      fill: s.tier === "core" ? "oklch(0.28 0.06 140)" : s.stroke,
+      opacity: s.tier === "core" ? 0.85 : 0.72,
+    };
+  });
+
+// ---- Label placement -------------------------------------------------------
+// Around Marianna the towns are genuinely close together, so labels placed
+// naively all centred above their dot overlap into an unreadable pile — exactly
+// where the map matters most. Positions are known at build time, so this
+// greedily tries a ring of candidate offsets per label and takes the first that
+// collides with nothing already placed. Anything that cannot be placed is
+// hidden until its town is selected, rather than allowed to overlap.
+const CHAR_W = 7.9; // ≈ advance width at font-size 16, weight 600
+const ASCENT = 13;
+const DESCENT = 4;
+
+type Anchor = "middle" | "start" | "end";
+interface Box {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+const overlaps = (a: Box, b: Box): boolean =>
+  a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
+function labelBox(node: Node, dx: number, dy: number, anchor: Anchor): Box {
+  const w = node.area.name.length * CHAR_W;
+  const cx = node.x + dx;
+  const x0 = anchor === "middle" ? cx - w / 2 : anchor === "start" ? cx : cx - w;
+  const y = node.y + dy;
+  return { x0, y0: y - ASCENT, x1: x0 + w, y1: y + DESCENT };
+}
+
+const dotBoxes: Box[] = nodes.map((n) => ({
+  x0: n.x - n.r - 3,
+  y0: n.y - n.r - 3,
+  x1: n.x + n.r + 3,
+  y1: n.y + n.r + 3,
+}));
+
+const placedBoxes: Box[] = [];
+
+// The Marianna pin and its wordmark claim their space first, and both are much
+// bigger than a town dot: the pin teardrop runs from the anchor point up ~35px,
+// and the label is 19px display type with letter-spacing. Reserving a
+// town-sized box here is what let "Cottondale" print straight through it.
+placedBoxes.push(
+  // the pin body
+  { x0: hubNode.x - 14, y0: hubNode.y - 36, x1: hubNode.x + 14, y1: hubNode.y + 6 },
+  // the MARIANNA wordmark above it
+  { x0: hubNode.x - 62, y0: hubNode.y - 49, x1: hubNode.x + 62, y1: hubNode.y - 27 },
+);
+
+// The county name plates claim their space too, at their final positions.
+for (const label of countyLabels) {
+  const w = (label.name.length + 6) * 6.6;
+  placedBoxes.push({
+    x0: label.x - w / 2,
+    y0: label.y - 9,
+    x1: label.x + w / 2,
+    y1: label.y + 5,
+  });
+}
+
+interface Placed {
+  node: Node;
+  dx: number;
+  dy: number;
+  anchor: Anchor;
+  hidden: boolean;
+}
+
+const candidatesFor = (n: Node): Array<[number, number, Anchor]> => [
+  [0, -(n.r + 9), "middle"],
+  [0, n.r + 17, "middle"],
+  [n.r + 8, 5, "start"],
+  [-(n.r + 8), 5, "end"],
+  [0, -(n.r + 26), "middle"],
+  [0, n.r + 33, "middle"],
+  [n.r + 8, -(n.r + 7), "start"],
+  [-(n.r + 8), -(n.r + 7), "end"],
+  [n.r + 8, n.r + 17, "start"],
+  [-(n.r + 8), n.r + 17, "end"],
+];
+
+const tierOrder: Record<AreaTier, number> = { core: 0, primary: 1, extended: 2 };
+const placementOrder = [...spokes].sort(
+  (a, b) =>
+    tierOrder[a.area.tier] - tierOrder[b.area.tier] ||
+    a.area.driveMinutes - b.area.driveMinutes ||
+    a.area.name.localeCompare(b.area.name),
+);
+
+const placed: Placed[] = [];
+for (const node of placementOrder) {
+  let chosen: Placed | null = null;
+  for (const [dx, dy, anchor] of candidatesFor(node)) {
+    const box = labelBox(node, dx, dy, anchor);
+    if (box.x0 < 4 || box.x1 > WIDTH - 4 || box.y0 < 4 || box.y1 > HEIGHT - 4) continue;
+    if (placedBoxes.some((p) => overlaps(box, p))) continue;
+    if (dotBoxes.some((d) => overlaps(box, d))) continue;
+    placedBoxes.push(box);
+    chosen = { node, dx, dy, anchor, hidden: false };
+    break;
+  }
+  placed.push(chosen ?? { node, dx: 0, dy: -(node.r + 9), anchor: "middle", hidden: true });
+}
+const labels = placed.sort((a, b) => a.node.area.name.localeCompare(b.node.area.name));
+
+// ---- Scale bar -------------------------------------------------------------
+// A degree of latitude is ~69.17 miles and the projection's Y axis is unscaled,
+// so px-per-mile follows directly from the projection scale.
+const PX_PER_MILE = scale / 69.17;
+const BAR_MILES = 20;
+const barPx = PX_PER_MILE * BAR_MILES;
+
+// ---- Grouped lists ---------------------------------------------------------
+const tiers: AreaTier[] = ["core", "primary", "extended"];
+const grouped = tiers.map((tier) => ({
+  tier,
+  label: tierLabels[tier],
+  blurb: tierBlurbs[tier],
+  swatch: tierStroke[tier],
+  items: areas
+    .filter((a) => a.tier === tier)
+    .sort((a, b) => a.driveMinutes - b.driveMinutes),
+}));
+
+const nodeData = nodes.map((n) => ({
+  slug: n.area.slug,
+  name: n.area.name,
+  county: n.area.county,
+  state: n.area.state,
+  minutes: n.area.driveMinutes,
+  tier: n.area.tier,
+  hasPage: Boolean(n.area.localNote?.length),
+}));
+---
+
+<div
+  x-data={`{
+    selected: '${hub.slug}',
+    towns: ${JSON.stringify(nodeData)},
+    get town() { return this.towns.find(t => t.slug === this.selected) },
+    tierLabel(t) { return ({ core: '${tierLabels.core}', primary: '${tierLabels.primary}', extended: '${tierLabels.extended}' })[t] }
+  }`}
+  class="grid gap-8 lg:grid-cols-[1.65fr_1fr] lg:items-start"
+>
+  {/* ---- The map plate ---- */}
+  <div class="scene relative" data-reveal="scale">
+    <div class="preserve-3d relative" style="transform: rotateX(11deg) rotateZ(-0.8deg);">
+      <div class="panel relative overflow-hidden rounded-2xl">
+        <svg
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          class="block h-auto w-full"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <radialGradient id="home-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--lime)" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="var(--lime)" stop-opacity="0" />
+            </radialGradient>
+            <filter id="pin-glow" x="-150%" y="-150%" width="400%" height="400%">
+              <feGaussianBlur stdDeviation="4" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <circle cx={hubNode.x} cy={hubNode.y} r={scale * 0.9} fill="url(#home-glow)" />
+
+          {/* Counties: wall, seam, then top face — north to south. */}
+          {
+            shapes.map((shape) => (
+              <g>
+                <path d={shape.wall} fill={shape.wallFill} />
+                <path
+                  d={shape.top}
+                  fill={shape.wallFill}
+                  transform={`translate(0 ${DEPTH / 2})`}
+                  opacity="0.9"
+                />
+                <path
+                  d={shape.top}
+                  fill={shape.fill}
+                  stroke={shape.stroke}
+                  stroke-width={shape.tier === "core" ? 2 : 1.2}
+                  stroke-linejoin="round"
+                />
+              </g>
+            ))
+          }
+
+          {/* County names on the three we name in copy */}
+          {
+            countyLabels.map((label) => (
+              <text
+                x={label.x}
+                y={label.y}
+                text-anchor="middle"
+                fill={label.fill}
+                fill-opacity={label.opacity}
+                font-size="12.5"
+                font-weight="700"
+                letter-spacing="2.4"
+                style="font-family: var(--font-sans)"
+              >
+                {label.name}
+              </text>
+            ))
+          }
+
+          {/* Town dots */}
+          {
+            spokes.map((n) => (
+              <g
+                class="cursor-pointer"
+                x-on:mouseenter={`selected = '${n.area.slug}'`}
+                x-on:click={`selected = '${n.area.slug}'`}
+              >
+                <circle cx={n.x} cy={n.y} r="22" fill="transparent" />
+                <circle cx={n.x} cy={n.y + 2} r={n.r} fill="oklch(0.12 0.01 150 / 0.55)" />
+                <circle
+                  cx={n.x}
+                  cy={n.y}
+                  r={n.r}
+                  fill="oklch(0.98 0.01 140)"
+                  stroke={tierStroke[n.area.tier]}
+                  stroke-width="2.5"
+                />
+                <circle
+                  cx={n.x}
+                  cy={n.y}
+                  r={n.r + 6}
+                  fill="none"
+                  stroke={tierStroke[n.area.tier]}
+                  stroke-width="2"
+                  x-bind:stroke-opacity={`selected === '${n.area.slug}' ? 0.95 : 0`}
+                  style="transition: stroke-opacity 0.2s ease"
+                />
+              </g>
+            ))
+          }
+
+          {/* Town labels, above every dot so nothing sits on a name */}
+          {
+            labels.map(({ node, dx, dy, anchor, hidden }) => (
+              <text
+                x={node.x + dx}
+                y={node.y + dy}
+                text-anchor={anchor}
+                class="pointer-events-none text-foreground"
+                fill="currentColor"
+                font-size="16"
+                font-weight="600"
+                fill-opacity={hidden ? 0 : 0.82}
+                style="font-family: var(--font-sans); paint-order: stroke; stroke: oklch(0.15 0.02 150); stroke-width: 4.5px; stroke-linejoin: round;"
+                x-bind:fill-opacity={`selected === '${node.area.slug}' ? 1 : ${hidden ? 0 : 0.82}`}
+              >
+                {node.area.name}
+              </text>
+            ))
+          }
+
+          {/* Marianna — a map pin, not another dot */}
+          <g
+            x-on:mouseenter={`selected = '${hub.slug}'`}
+            x-on:click={`selected = '${hub.slug}'`}
+            class="cursor-pointer"
+          >
+            <ellipse
+              cx={hubNode.x}
+              cy={hubNode.y + 2}
+              rx="7"
+              ry="3"
+              fill="oklch(0.12 0.01 150 / 0.6)"
+            />
+            <path
+              d={`M${hubNode.x},${hubNode.y + 2}c-8.5,-11 -12.5,-16.5 -12.5,-22.5a12.5,12.5 0 1 1 25,0c0,6 -4,11.5 -12.5,22.5Z`}
+              fill="var(--sun)"
+              stroke="oklch(0.15 0.02 150)"
+              stroke-width="1.5"
+              filter="url(#pin-glow)"
+            />
+            <circle cx={hubNode.x} cy={hubNode.y - 20.5} r="4.6" fill="oklch(0.15 0.02 150)" />
+            <text
+              x={hubNode.x}
+              y={hubNode.y - 32}
+              text-anchor="middle"
+              fill="var(--sun)"
+              font-size="19"
+              font-weight="700"
+              style="font-family: var(--font-display); letter-spacing: 0.07em; paint-order: stroke; stroke: oklch(0.15 0.02 150); stroke-width: 5px; stroke-linejoin: round;"
+            >
+              MARIANNA
+            </text>
+          </g>
+
+          {/* Scale bar + north arrow — the details that make it read as a map */}
+          <g transform={`translate(${PAD_X + 4} ${HEIGHT - 26})`}>
+            <line
+              x1="0"
+              y1="0"
+              x2={barPx}
+              y2="0"
+              stroke="var(--foreground)"
+              stroke-opacity="0.45"
+              stroke-width="2"
+            />
+            <line x1="0" y1="-4" x2="0" y2="4" stroke="var(--foreground)" stroke-opacity="0.45" stroke-width="2" />
+            <line
+              x1={barPx}
+              y1="-4"
+              x2={barPx}
+              y2="4"
+              stroke="var(--foreground)"
+              stroke-opacity="0.45"
+              stroke-width="2"
+            />
+            <text
+              x={barPx / 2}
+              y="17"
+              text-anchor="middle"
+              fill="var(--foreground)"
+              fill-opacity="0.45"
+              font-size="12"
+              font-weight="600"
+              style="font-family: var(--font-sans)"
+            >
+              {BAR_MILES} miles
+            </text>
+          </g>
+
+          <g transform={`translate(${WIDTH - PAD_X - 14} ${HEIGHT - 34})`}>
+            <path d="M0,-14 L5,4 L0,0 L-5,4 Z" fill="var(--foreground)" fill-opacity="0.5" />
+            <text
+              x="0"
+              y="18"
+              text-anchor="middle"
+              fill="var(--foreground)"
+              fill-opacity="0.5"
+              font-size="12"
+              font-weight="700"
+              style="font-family: var(--font-sans)"
+            >
+              N
+            </text>
+          </g>
+        </svg>
+
+        {/* Legend */}
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border/60 px-5 py-3.5">
+          {
+            grouped.map((g) => (
+              <span class="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <span
+                  class="h-2.5 w-2.5 rounded-sm"
+                  style={`background:${g.swatch}`}
+                  aria-hidden="true"
+                />
+                {g.label}
+              </span>
+            ))
+          }
+          <span class="ml-auto hidden text-xs text-muted-foreground/70 sm:inline">
+            Hover a town for details
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* ---- Info panel, driven by the map selection ---- */}
+  <div class="panel rounded-2xl p-6" data-reveal="right" x-cloak>
+    <p class="text-xs font-bold uppercase tracking-[0.22em] text-primary">Coverage detail</p>
+
+    <h3 class="mt-3 font-display text-3xl font-bold uppercase text-foreground" x-text="town.name">
+      {hub.name}
+    </h3>
+
+    <p class="mt-1 text-sm text-muted-foreground" x-text="town.county + ', ' + town.state">
+      {hub.county}, {hub.state}
+    </p>
+
+    <dl class="mt-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <Clock class="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+        <div>
+          <dt class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Drive time from Marianna
+          </dt>
+          <dd class="text-base font-bold text-foreground">
+            <template x-if="town.minutes === 0">
+              <span>Home base</span>
+            </template>
+            <template x-if="town.minutes > 0">
+              <span><span x-text="town.minutes"></span> minutes</span>
+            </template>
+          </dd>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3">
+        <MapPin class="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+        <div>
+          <dt class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Coverage tier
+          </dt>
+          <dd class="text-base font-bold text-foreground" x-text="tierLabel(town.tier)">
+            {tierLabels.core}
+          </dd>
+        </div>
+      </div>
+    </dl>
+
+    <template x-if="town.hasPage">
+      <a
+        x-bind:href="'/service-areas/' + town.slug"
+        class="mt-6 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+      >
+        <span x-text="'Lawn care in ' + town.name"></span>
+        <ArrowRight class="h-4 w-4" aria-hidden="true" />
+      </a>
+    </template>
+
+    <p class="mt-6 border-t border-border/60 pt-5 text-sm leading-relaxed text-muted-foreground">
+      Not listed, or right on the edge? Call and ask — we travel up to about two
+      hours for larger jobs and we will tell you straight if we can get there.
+    </p>
+  </div>
+</div>
+
+{/* ---- The authoritative, no-JS town list ---- */}
+<div class="mt-14 grid gap-6 md:grid-cols-3" data-reveal-group>
+  {
+    grouped.map((g) => (
+      <div class="panel rounded-xl p-6" data-reveal>
+        <div class="flex items-center gap-2.5">
+          <span
+            class="h-3 w-3 rounded-sm"
+            style={`background:${g.swatch}`}
+            aria-hidden="true"
+          />
+          <h3 class="font-display text-xl font-bold uppercase text-foreground">{g.label}</h3>
+        </div>
+        <p class="mt-2.5 text-sm leading-relaxed text-muted-foreground">{g.blurb}</p>
+        <ul class="mt-4 flex flex-wrap gap-x-3 gap-y-1.5">
+          {g.items.map((a) =>
+            a.localNote?.length ? (
+              <li>
+                <a
+                  href={`/service-areas/${a.slug}`}
+                  class="text-sm font-semibold text-primary hover:underline"
+                >
+                  {a.name}
+                </a>
+              </li>
+            ) : (
+              <li class="text-sm text-muted-foreground">{a.name}</li>
+            ),
+          )}
+        </ul>
+      </div>
+    ))
+  }
+</div>

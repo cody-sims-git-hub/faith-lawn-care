@@ -1,0 +1,70 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import PageHeader from "~/components/PageHeader.astro";
+import Section from "~/components/Section.astro";
+import CoverageMap from "~/components/CoverageMap.astro";
+import CtaBand from "~/components/CtaBand.astro";
+import { localBusiness, breadcrumbs } from "~/lib/structured-data";
+import { countiesServed } from "~/lib/areas";
+
+const jsonLd = [
+  localBusiness(),
+  breadcrumbs([
+    { name: "Home", path: "/" },
+    { name: "Service Areas", path: "/service-areas" },
+  ]),
+];
+---
+
+<Layout
+  title="Service Areas in the FL Panhandle | Faith Lawn Care"
+  description="Serving Marianna, Cottondale, Graceville, Sneads, Blountstown, Bristol, and Chipley. See our interactive coverage map of the Florida Panhandle."
+  path="/service-areas"
+  jsonLd={jsonLd}
+>
+  <PageHeader eyebrow="Where we work" title="Service Areas">
+    We are based in Marianna and cover {countiesServed.length} counties across the
+    Panhandle. Hover or tap any town on the map to see how far out it is and what
+    kind of scheduling to expect.
+  </PageHeader>
+
+  <Section>
+    <CoverageMap />
+  </Section>
+
+  <Section band size="sm">
+    <div class="max-w-3xl" data-reveal>
+      <h2 class="font-display text-3xl font-bold uppercase text-foreground">
+        How the tiers actually work
+      </h2>
+      <div class="mt-5 space-y-4 text-lg leading-relaxed text-muted-foreground">
+        <p>
+          The difference between tiers is scheduling, not quality or price. A
+          lawn in Bristol gets the same crew and the same standard as one in
+          Marianna — it just runs on a set day rather than any day.
+        </p>
+        <p>
+          Jackson County is home. We are somewhere in the county most days, so we
+          can usually work an urgent job in quickly and there is no travel charge
+          or minimum property size.
+        </p>
+        <p>
+          Calhoun and Liberty run on grouped routes. If you want regular mowing
+          out there, say so early and we will put you on the rotation rather than
+          fitting you in around it.
+        </p>
+        <p>
+          Past that, out to roughly two hours, we take the jobs that justify the
+          drive: cleanouts, hauls, tree work, and full property cleanups. Call
+          and describe it — we will tell you honestly whether it makes sense for
+          us to come, rather than quoting a number we cannot stand behind.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <CtaBand
+    title="Not sure if you're in range?"
+    body="Call and ask. It takes thirty seconds and we will give you a straight yes or no."
+  />
+</Layout>

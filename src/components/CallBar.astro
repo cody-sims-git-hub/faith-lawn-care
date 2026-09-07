@@ -1,0 +1,41 @@
+---
+/**
+ * Sticky tap-to-call / tap-to-text bar, mobile only.
+ *
+ * This audience calls. Most of the traffic here is someone standing in their
+ * yard on a phone, and the single highest-value thing the site can do is put a
+ * thumb-reachable call button on screen at all times. Hidden on desktop, where
+ * the header CTA already carries it.
+ *
+ * The layout reserves matching bottom padding on small screens (see the
+ * spacer) so the bar never covers the last line of a page.
+ */
+import { Phone, MessageSquare } from "@lucide/astro";
+import { TEL_HREF, SMS_HREF, PHONE_DISPLAY } from "~/lib/site-meta";
+---
+
+<div class="h-[4.5rem] sm:hidden" aria-hidden="true"></div>
+
+<div
+  class="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-lg sm:hidden"
+>
+  <div class="grid grid-cols-2 gap-2 p-2.5">
+    <a
+      href={TEL_HREF}
+      data-track="callbar-call"
+      class="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 text-base font-bold text-primary-foreground"
+    >
+      <Phone class="h-5 w-5" aria-hidden="true" />
+      Call now
+    </a>
+    <a
+      href={SMS_HREF}
+      data-track="callbar-text"
+      class="flex items-center justify-center gap-2 rounded-lg border border-primary/60 px-4 py-3.5 text-base font-bold text-primary"
+    >
+      <MessageSquare class="h-5 w-5" aria-hidden="true" />
+      Text us
+    </a>
+  </div>
+  <span class="sr-only">Call or text {PHONE_DISPLAY}</span>
+</div>

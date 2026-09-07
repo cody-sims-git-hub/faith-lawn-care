@@ -1,0 +1,35 @@
+# Cloudflare Pages response headers.
+# Syntax: a path pattern, then indented "Header: value" lines.
+
+/*
+  # Clickjacking / MIME sniffing / referrer leakage.
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  # This site has no camera, mic, or geolocation features. Deny them outright so
+  # an injected script cannot prompt for them either.
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+  # Two years, preload-eligible. Only safe because the apex and every subdomain
+  # are served over TLS through Cloudflare.
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  # CSP notes:
+  #   'unsafe-inline' on script-src is required by Astro's inline hydration
+  #     bootstrap and the is:inline theme script in Layout.astro.
+  #   challenges.cloudflare.com is Turnstile (script + iframe).
+  #   fonts.googleapis.com / fonts.gstatic.com serve the two web fonts.
+  #   'unsafe-inline' on style-src covers the inline style attributes used by
+  #     the coverage map's 3D transforms.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://challenges.cloudflare.com; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; upgrade-insecure-requests
+
+# Astro fingerprints everything under _astro/, so it can be cached forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+/*.jpg
+  Cache-Control: public, max-age=86400
+
+/*.png
+  Cache-Control: public, max-age=86400

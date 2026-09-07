@@ -1,0 +1,61 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import { Phone, House } from "@lucide/astro";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+
+const links = [
+  { label: "Services", href: "/services" },
+  { label: "Service Areas", href: "/service-areas" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Contact", href: "/contact" },
+];
+---
+
+<Layout
+  title="Page Not Found | Faith Lawn Care"
+  description="That page does not exist. Call or text 850-209-8982 and we will point you in the right direction."
+  path="/404"
+>
+  <section class="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center sm:px-6 sm:py-32">
+    <p class="font-display text-7xl font-bold text-primary">404</p>
+
+    <h1 class="mt-4 font-display text-4xl font-bold uppercase sm:text-5xl">
+      That page grew over
+    </h1>
+
+    <p class="mt-5 text-lg leading-relaxed text-muted-foreground">
+      We could not find what you were looking for. Try one of these, or just call
+      us — that is usually faster anyway.
+    </p>
+
+    <nav class="mt-8 flex flex-wrap justify-center gap-3" aria-label="Helpful links">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="rounded-lg border border-border px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:border-primary"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+      <a
+        href={TEL_HREF}
+        class="inline-flex items-center justify-center gap-2.5 rounded-lg bg-primary px-7 py-4 text-base font-bold text-primary-foreground"
+      >
+        <Phone class="h-5 w-5" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+      <a
+        href="/"
+        class="inline-flex items-center justify-center gap-2.5 rounded-lg border border-border px-7 py-4 text-base font-bold text-foreground transition-colors hover:border-primary"
+      >
+        <House class="h-5 w-5 text-primary" aria-hidden="true" />
+        Home
+      </a>
+    </div>
+  </section>
+</Layout>

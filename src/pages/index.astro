@@ -1,0 +1,157 @@
+---
+import Layout from "~/layouts/Layout.astro";
+import Hero from "~/components/Hero.astro";
+import Section from "~/components/Section.astro";
+import SectionHeading from "~/components/SectionHeading.astro";
+import ServiceCard from "~/components/ServiceCard.astro";
+import CoverageMap from "~/components/CoverageMap.astro";
+import FaqList from "~/components/FaqList.astro";
+import CtaBand from "~/components/CtaBand.astro";
+import { Image } from "astro:assets";
+import { ArrowRight, PhoneCall, ClipboardList, Sparkles } from "@lucide/astro";
+
+import lawnPhoto from "~/assets/lawn-brick-house.jpg";
+import { featuredServices, services } from "~/lib/services";
+import { faqs } from "~/lib/faq";
+import { localBusiness, serviceCatalog, faqPage } from "~/lib/structured-data";
+
+const steps = [
+  {
+    icon: PhoneCall,
+    title: "Call or text",
+    body: "Tell us what you need — or just send a photo of the yard. Fastest way to get a real answer.",
+  },
+  {
+    icon: ClipboardList,
+    title: "We come look",
+    body: "We walk the property and give you a firm price. Free, and no obligation to book anything.",
+  },
+  {
+    icon: Sparkles,
+    title: "We get it done",
+    body: "On the day we said, at the price we quoted, with every clipping and limb hauled off.",
+  },
+];
+
+const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
+---
+
+<Layout
+  title="Faith Lawn Care | Lawn Care & Junk Removal in Marianna, FL"
+  description="Full-service lawn care, landscaping, tree work, pressure washing, and junk removal in Marianna and across Jackson, Calhoun, and Liberty counties."
+  path="/"
+  jsonLd={jsonLd}
+>
+  <Hero />
+
+  {/* ---- Services ---- */}
+  <Section band id="services">
+    <SectionHeading eyebrow="What we do" title="One crew for the whole property">
+      Most of our customers started with mowing and kept us for everything else.
+      Here is what gets asked for most — there are twelve services in all.
+    </SectionHeading>
+
+    <div
+      class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      data-reveal-group
+      data-reveal-stagger="80"
+    >
+      {featuredServices.map((service) => <ServiceCard service={service} />)}
+    </div>
+
+    <div class="mt-10" data-reveal>
+      <a
+        href="/services"
+        class="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3.5 text-base font-bold text-foreground transition-colors hover:border-primary"
+      >
+        See all twelve services
+        <ArrowRight class="h-4 w-4 text-primary" aria-hidden="true" />
+      </a>
+    </div>
+  </Section>
+
+  {/* ---- How it works ---- */}
+  <Section>
+    <div class="grid gap-14 lg:grid-cols-2 lg:items-center">
+      <div>
+        <SectionHeading eyebrow="How it works" title="No runaround">
+          You should not have to chase a lawn company for a price or wonder
+          whether they are coming. Three steps, and you always know where you
+          stand.
+        </SectionHeading>
+
+        <ol class="mt-10 space-y-7" data-reveal-group>
+          {
+            steps.map((step, i) => (
+              <li class="flex gap-5" data-reveal>
+                <span
+                  class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary ring-1 ring-primary/25"
+                >
+                  <step.icon class="h-6 w-6" aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 class="text-lg font-bold uppercase text-foreground">
+                    <span class="mr-2 text-primary">{i + 1}.</span>
+                    {step.title}
+                  </h3>
+                  <p class="mt-1.5 text-base leading-relaxed text-muted-foreground">
+                    {step.body}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="scene" data-reveal="right">
+        <div
+          class="preserve-3d relative"
+          style="transform: rotateY(-7deg) rotateX(3deg);"
+        >
+          <Image
+            src={lawnPhoto}
+            alt="A large striped lawn in Jackson County, Florida, mowed by Faith Lawn Care, with a brick house in the background"
+            widths={[480, 720, 960]}
+            sizes="(min-width: 1024px) 40vw, 90vw"
+            quality={68}
+            loading="lazy"
+            class="w-full rounded-2xl border border-border/70 shadow-2xl"
+          />
+          <div
+            class="pointer-events-none absolute -inset-6 -z-10 rounded-3xl opacity-45"
+            style="transform: translateZ(-70px); background: radial-gradient(60% 60% at 50% 50%, var(--lime), transparent 70%); filter: blur(46px);"
+            aria-hidden="true"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  {/* ---- Coverage ---- */}
+  <Section band id="areas">
+    <SectionHeading eyebrow="Where we work" title="Marianna out to about two hours">
+      Jackson County is home and we are there weekly. Calhoun and Liberty run on
+      scheduled routes, and we will travel further for bigger jobs.
+    </SectionHeading>
+
+    <div class="mt-12">
+      <CoverageMap />
+    </div>
+  </Section>
+
+  {/* ---- FAQ ---- */}
+  <Section id="faq">
+    <SectionHeading eyebrow="Questions" title="The things people ask first">
+      Straight answers. If yours is not here, call and ask — we would rather tell
+      you now than surprise you later.
+    </SectionHeading>
+
+    <div class="mt-10 max-w-3xl">
+      <FaqList />
+    </div>
+  </Section>
+
+  <CtaBand />
+</Layout>

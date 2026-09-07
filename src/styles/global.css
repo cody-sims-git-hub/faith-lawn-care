@@ -1,0 +1,342 @@
+@import "tailwindcss";
+
+/* Alpine.js: hide elements with x-cloak until Alpine initializes. */
+[x-cloak] {
+  display: none !important;
+}
+
+/*
+  Faith Lawn Care — the palette is lifted from the company's own flyer: a deep
+  forest ground, bright grass lime, and white. Dark-first is a deliberate
+  choice. Every competitor in this market runs a white page with a green header;
+  the flyer they already hand out is dark, so this both matches the brand they
+  have and stands apart in the search results.
+
+  The site is dark-only, so tokens live on :root with no light variant to drift.
+*/
+:root {
+  --radius: 0.875rem;
+
+  /* Ground: near-black with a green cast, like the flyer's tree line. */
+  --background: oklch(0.17 0.022 148);
+  --foreground: oklch(0.97 0.008 140);
+
+  --card: oklch(0.215 0.026 148);
+  --card-foreground: oklch(0.97 0.008 140);
+
+  /* Grass lime — the brand accent. It is used as a FILL with dark green text
+     on top (about 10:1), never as white-on-lime, which would fail AA badly at
+     this lightness. --primary-foreground is that dark green. */
+  --primary: oklch(0.79 0.178 133);
+  --primary-foreground: oklch(0.19 0.035 148);
+
+  /* A deeper leaf green for secondary fills that DO carry light text. */
+  --secondary: oklch(0.3 0.045 150);
+  --secondary-foreground: oklch(0.97 0.008 140);
+
+  --muted: oklch(0.25 0.025 148);
+  --muted-foreground: oklch(0.74 0.022 142);
+
+  --accent: oklch(0.32 0.05 150);
+  --accent-foreground: oklch(0.97 0.008 140);
+
+  --destructive: oklch(0.62 0.21 27);
+  --destructive-foreground: oklch(0.98 0.01 140);
+
+  --border: oklch(0.36 0.035 150 / 55%);
+  --input: oklch(0.36 0.035 150 / 70%);
+  --ring: oklch(0.79 0.178 133);
+
+  /* Brighter lime for glow, map nodes, and hairline highlights. */
+  --lime: oklch(0.86 0.19 130);
+  /* Warm sun accent — used sparingly, mostly on the map's hub and on hover. */
+  --sun: oklch(0.83 0.15 84);
+
+  /* Coverage-tier colours. Shared by the map, its legend, and the tier lists,
+     so a tier can never be one colour in the legend and another on the map. */
+  --tier-core: oklch(0.86 0.19 130);
+  --tier-primary: oklch(0.74 0.14 165);
+  --tier-extended: oklch(0.66 0.09 195);
+}
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow Condensed", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-lime: var(--lime);
+  --color-sun: var(--sun);
+  --color-tier-core: var(--tier-core);
+  --color-tier-primary: var(--tier-primary);
+  --color-tier-extended: var(--tier-extended);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* The display face is condensed and heavy — the flyer's headline voice. */
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+
+  /* Never let a focus ring be invisible on the dark ground. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   3D primitives
+   The site's depth comes from CSS transforms, not a WebGL bundle.
+   These cost nothing on the network and are GPU-composited.
+   ============================================================ */
+
+/* Establishes the shared 3D camera for a group of children. */
+@utility scene {
+  perspective: 1200px;
+  perspective-origin: 50% 40%;
+}
+@utility scene-tight {
+  perspective: 800px;
+  perspective-origin: 50% 50%;
+}
+@utility preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/*
+  Tilt card. The lift is driven by two CSS variables that a tiny pointer handler
+  writes (see lib/tilt.ts) — so the transform itself stays in CSS, the JS only
+  moves numbers, and with no JS at all the card is simply a flat card.
+*/
+@utility tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(calc(var(--tilt-x, 0) * 1deg))
+    rotateY(calc(var(--tilt-y, 0) * 1deg)) translateZ(0);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.4s ease;
+  will-change: transform;
+}
+@utility tilt-card-active {
+  transition-duration: 0.08s;
+}
+/* Children lifted off the card face, so the tilt reads as real depth. */
+@utility tilt-layer {
+  transform: translateZ(var(--tilt-z, 28px));
+}
+
+/* The specular sheen that tracks the pointer across a tilted card. */
+@utility tilt-sheen {
+  background: radial-gradient(
+    circle at var(--sheen-x, 50%) var(--sheen-y, 0%),
+    oklch(0.95 0.12 130 / 0.16),
+    transparent 55%
+  );
+}
+
+/* ============================================================
+   Surfaces
+   ============================================================ */
+
+@utility panel {
+  background: linear-gradient(
+    165deg,
+    oklch(0.26 0.032 150 / 0.72) 0%,
+    oklch(0.2 0.024 148 / 0.62) 100%
+  );
+  border: 1px solid oklch(0.55 0.05 150 / 0.28);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.05),
+    0 18px 44px -28px oklch(0 0 0 / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+@utility glow-lime {
+  box-shadow: 0 0 70px -18px var(--lime);
+}
+
+/* Full-bleed raised band, so the page reads as stacked planes. */
+.section-band {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 80% at 50% -10%, oklch(0.79 0.178 133 / 0.11), transparent 62%),
+    linear-gradient(
+      180deg,
+      oklch(0.225 0.028 149 / 0.85) 0%,
+      oklch(0.2 0.024 148 / 0.7) 74%,
+      oklch(0.17 0.022 148 / 0.15) 100%
+    );
+  border-top: 1px solid oklch(0.6 0.06 150 / 0.26);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.04);
+}
+
+/* A faint mowing-stripe texture on raised bands — the visual signature, taken
+   from the stripe pattern in the company's own lawn photos. */
+.section-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: repeating-linear-gradient(
+    100deg,
+    oklch(0.79 0.178 133 / 0.05) 0px,
+    oklch(0.79 0.178 133 / 0.05) 2px,
+    transparent 2px,
+    transparent 46px
+  );
+  -webkit-mask-image: radial-gradient(130% 92% at 50% 0%, black 15%, transparent 78%);
+  mask-image: radial-gradient(130% 92% at 50% 0%, black 15%, transparent 78%);
+}
+
+/* ============================================================
+   Motion
+   ============================================================ */
+
+@keyframes rise {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotateZ(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotateZ(0.6deg);
+  }
+}
+@keyframes pulse-node {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.5);
+  }
+}
+/* The signal travelling out along a route line on the coverage map. */
+@keyframes route-dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+/* For LCP-critical text (the h1): moves without ever being invisible, so
+   Chrome can nominate it as an LCP candidate immediately. An opacity fade here
+   charges the entire animation duration to LCP. */
+@utility animate-rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@utility animate-float-slow {
+  animation: float-slow 9s ease-in-out infinite;
+}
+@utility animate-pulse-node {
+  animation: pulse-node 2.8s ease-in-out infinite;
+}
+@utility animate-sweep {
+  animation: sweep 4.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   Scroll reveal
+   Progressive enhancement: [data-reveal] elements start hidden and ease in on
+   entry. Gated behind html.js, so with JavaScript off — and for crawlers —
+   everything renders fully visible. Disabled under prefers-reduced-motion.
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translate3d(var(--reveal-x, 0), var(--reveal-y, 1.5rem), 0)
+      scale(var(--reveal-scale, 1));
+    transition:
+      opacity var(--reveal-duration, 0.55s) cubic-bezier(0.22, 1, 0.36, 1)
+        var(--reveal-delay, 0ms),
+      transform var(--reveal-duration, 0.55s) cubic-bezier(0.22, 1, 0.36, 1)
+        var(--reveal-delay, 0ms);
+  }
+  html.js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+  html.js [data-reveal="fade"] {
+    --reveal-y: 0;
+  }
+  html.js [data-reveal="scale"] {
+    --reveal-y: 0;
+    --reveal-scale: 0.94;
+  }
+  html.js [data-reveal="left"] {
+    --reveal-y: 0;
+    --reveal-x: -2rem;
+  }
+  html.js [data-reveal="right"] {
+    --reveal-y: 0;
+    --reveal-x: 2rem;
+  }
+}
+
+/* ============================================================
+   Reduced motion — one place, everything off.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tilt-card {
+    transform: none !important;
+  }
+}

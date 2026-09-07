@@ -1,0 +1,49 @@
+---
+/**
+ * Maps a service's `icon` string to a lucide component.
+ *
+ * The mapping is explicit rather than a namespace import (`import * as icons`)
+ * on purpose: a namespace import defeats tree-shaking and pulls the entire
+ * lucide set into the bundle. This ships only the twelve icons actually used.
+ */
+import {
+  Tractor,
+  DraftingCompass,
+  Shovel,
+  Leaf,
+  Sprout,
+  SprayCan,
+  Layers,
+  Scissors,
+  Droplets,
+  TreePine,
+  WavesHorizontal,
+  Truck,
+} from "@lucide/astro";
+
+const registry = {
+  Tractor,
+  DraftingCompass,
+  Shovel,
+  Leaf,
+  Sprout,
+  SprayCan,
+  Layers,
+  Scissors,
+  Droplets,
+  TreePine,
+  WavesHorizontal,
+  Truck,
+} as const;
+
+interface Props {
+  name: string;
+  class?: string;
+}
+const { name, class: className = "h-6 w-6" } = Astro.props;
+
+// Fall back to the mower rather than crashing the build on a typo'd icon name.
+const Icon = registry[name as keyof typeof registry] ?? Tractor;
+---
+
+<Icon class={className} aria-hidden="true" />

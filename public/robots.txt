@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The API route only accepts POST and has nothing to index.
+Disallow: /api/
+
+Sitemap: https://faithlawncarellc.com/sitemap-index.xml

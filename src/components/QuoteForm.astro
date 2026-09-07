@@ -1,0 +1,235 @@
+---
+/**
+ * Quote request form.
+ *
+ * Posts to the Cloudflare Pages Function at /api/quote, which verifies the
+ * Turnstile token server-side and relays the request to the owner's inbox.
+ * Nothing is stored.
+ *
+ * Progressive enhancement: this is a real <form> with a real action and method,
+ * so with JavaScript disabled it still submits and the Function replies with a
+ * redirect to /thank-you. Alpine upgrades it to an inline fetch with status
+ * messaging when JS is available.
+ */
+import { LoaderCircle, Check, CircleAlert, Phone } from "@lucide/astro";
+import { services } from "~/lib/services";
+import { contactConfig } from "~/lib/contact-config";
+import { PHONE_DISPLAY, TEL_HREF } from "~/lib/site-meta";
+
+const { endpoint, turnstileSiteKey } = contactConfig;
+---
+
+<form
+  method="POST"
+  action={endpoint}
+  x-data={`{
+    status: 'idle',
+    error: '',
+    async submit(event) {
+      const form = event.target;
+      if (!form.reportValidity()) return;
+      this.status = 'sending';
+      this.error = '';
+      try {
+        const response = await fetch('${endpoint}', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: new FormData(form),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Something went wrong.');
+        this.status = 'sent';
+        form.reset();
+        if (window.turnstile) window.turnstile.reset();
+      } catch (err) {
+        this.status = 'error';
+        this.error = err.message || 'Something went wrong.';
+      }
+    }
+  }`}
+  x-on:submit.prevent="submit($event)"
+  class="panel rounded-2xl p-6 sm:p-8"
+>
+  {/* Success state replaces the fields entirely. */}
+  <template x-if="status === 'sent'">
+    <div class="py-8 text-center">
+      <span
+        class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/30"
+      >
+        <Check class="h-7 w-7" aria-hidden="true" />
+      </span>
+      <h3 class="mt-5 font-display text-2xl font-bold uppercase text-foreground">
+        Request sent
+      </h3>
+      <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+        We have got it and will get back to you shortly. If you need us sooner,
+        calling is always fastest.
+      </p>
+      <a
+        href={TEL_HREF}
+        class="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
+      >
+        <Phone class="h-4 w-4" aria-hidden="true" />
+        {PHONE_DISPLAY}
+      </a>
+    </div>
+  </template>
+
+  <div x-show="status !== 'sent'">
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div class="sm:col-span-1">
+        <label for="name" class="mb-1.5 block text-sm font-semibold text-foreground">
+          Your name <span class="text-primary">*</span>
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          class="w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          placeholder="Jane Smith"
+        />
+      </div>
+
+      <div class="sm:col-span-1">
+        <label for="phone" class="mb-1.5 block text-sm font-semibold text-foreground">
+          Phone <span class="text-primary">*</span>
+        </label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          required
+          autocomplete="tel"
+          inputmode="tel"
+          class="w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          placeholder="850-000-0000"
+        />
+      </div>
+
+      <div class="sm:col-span-1">
+        <label for="email" class="mb-1.5 block text-sm font-semibold text-foreground">
+          Email <span class="font-normal text-muted-foreground">(optional)</span>
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          class="w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          placeholder="you@example.com"
+        />
+      </div>
+
+      <div class="sm:col-span-1">
+        <label for="town" class="mb-1.5 block text-sm font-semibold text-foreground">
+          Town <span class="text-primary">*</span>
+        </label>
+        <input
+          id="town"
+          name="town"
+          type="text"
+          required
+          autocomplete="address-level2"
+          class="w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          placeholder="Marianna"
+        />
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="service" class="mb-1.5 block text-sm font-semibold text-foreground">
+          What do you need?
+        </label>
+        <select
+          id="service"
+          name="service"
+          class="w-full rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground focus:border-primary focus:outline-none"
+        >
+          <option value="">Not sure yet — help me figure it out</option>
+          {services.map((s) => <option value={s.name}>{s.name}</option>)}
+        </select>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="details" class="mb-1.5 block text-sm font-semibold text-foreground">
+          Tell us about the property
+        </label>
+        <textarea
+          id="details"
+          name="details"
+          rows="4"
+          class="w-full resize-y rounded-lg border border-input bg-background/60 px-4 py-3 text-base text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
+          placeholder="Roughly how big is the yard? Anything we should know before we come look?"
+        ></textarea>
+      </div>
+    </div>
+
+    {/* Honeypot. Real users never see it; bots fill everything they find.
+        Hidden from assistive tech too, so a screen reader never announces it. */}
+    <div class="absolute left-[-9999px]" aria-hidden="true">
+      <label for="company">Company (leave blank)</label>
+      <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    {
+      turnstileSiteKey && (
+        <div
+          class="cf-turnstile mt-5"
+          data-sitekey={turnstileSiteKey}
+          data-theme="dark"
+        />
+      )
+    }
+
+    <button
+      type="submit"
+      x-bind:disabled="status === 'sending'"
+      class="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 text-base font-bold text-primary-foreground transition-transform hover:scale-[1.01] disabled:opacity-60"
+    >
+      <template x-if="status === 'sending'">
+        <LoaderCircle class="h-5 w-5 animate-spin" aria-hidden="true" />
+      </template>
+      <span x-text="status === 'sending' ? 'Sending…' : 'Request my free estimate'">
+        Request my free estimate
+      </span>
+    </button>
+
+    <div
+      x-show="status === 'error'"
+      x-cloak
+      role="alert"
+      class="mt-4 flex items-start gap-2.5 rounded-lg border border-destructive/40 bg-destructive/10 p-3.5 text-sm text-foreground"
+    >
+      <CircleAlert class="mt-0.5 h-4 w-4 shrink-0 text-destructive" aria-hidden="true" />
+      <span>
+        <span x-text="error"></span>
+        {" "}You can always reach us directly at
+        <a href={TEL_HREF} class="font-bold text-primary underline">{PHONE_DISPLAY}</a>.
+      </span>
+    </div>
+
+    <p class="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
+      We use your details to get back to you about this request and nothing else.
+      No storage, no lists, no sharing.
+    </p>
+  </div>
+</form>
+
+{/*
+  Turnstile loader. Deliberately WITHOUT a Subresource Integrity hash:
+  Cloudflare ships rolling updates to this script and documents that it is not
+  SRI-pinnable, so a hash here would break the CAPTCHA the first time they
+  publish a change. The script is first-party to our own CDN provider and is
+  already constrained by the CSP in public/_headers.
+*/}
+{
+  turnstileSiteKey && (
+    <script
+      is:inline
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    />
+  )
+}
