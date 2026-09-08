@@ -21,9 +21,23 @@ interface Props {
  ogImage?: string;
  /** schema.org JSON-LD objects rendered into <head>. */
  jsonLd?: unknown[];
+ /**
+  * Responsive image to preload as the LCP element (the homepage hero).
+  * Emitting this in <head> lets the browser fetch the hero concurrently with
+  * the CSS instead of waiting until it parses the <img> in the body — which
+  * was costing ~635ms of LCP "load delay" on mobile.
+  */
+ preloadImage?: { imagesrcset: string; imagesizes: string };
 }
 
-const { title, description, path = "/", ogImage, jsonLd = [] } = Astro.props;
+const {
+ title,
+ description,
+ path = "/",
+ ogImage,
+ jsonLd = [],
+ preloadImage,
+} = Astro.props;
 
 // Canonical carries no trailing slash (see astro.config.mjs). The root is the
 // one exception — "https://site.com" with nothing after it.
@@ -52,6 +66,19 @@ const ogImageUrl = ogImage
  <title>{title}</title>
  <meta name="description" content={description} />
  <link rel="canonical" href={canonical} />
+
+ {/* LCP hero preload — fetches the hero image alongside the CSS. */}
+ {
+ preloadImage && (
+ <link
+ rel="preload"
+ as="image"
+ imagesrcset={preloadImage.imagesrcset}
+ imagesizes={preloadImage.imagesizes}
+ fetchpriority="high"
+ />
+ )
+ }
 
  {/* Open Graph */}
  <meta property="og:type" content="website" />
@@ -129,7 +156,14 @@ const ogImageUrl = ogImage
  </script>
  
   <!--
-    Google Analytics.
+    Google Analytics — loaded LAZILY, off the critical path.
+
+    gtag.js costs ~127ms of main-thread time. Loading it during page load pushed
+    Total Blocking Time up and dragged the mobile PageSpeed score down even
+    though LCP and CLS were already green. So we defer it until the first real
+    signal of engagement — the first interaction, or ~4s of idle, whichever
+    comes first — which keeps the initial load's main thread clear while still
+    capturing every genuine visit (the pageview fires the moment gtag loads).
 
     Gated on the canonical hostname on purpose: Cloudflare Pages serves every
     branch preview on a public *.pages.dev URL, and without this gate our own
@@ -141,18 +175,41 @@ const ogImageUrl = ogImage
   -->
   <script is:inline define:vars={{ gaId: GA_MEASUREMENT_ID, siteHost: SITE_HOST }}>
     if (window.location.hostname === siteHost) {
-      var tag = document.createElement("script");
-      tag.async = true;
-      tag.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
-      document.head.appendChild(tag);
+      var started = false;
+      var load = function () {
+        if (started) return;
+        started = true;
+        var tag = document.createElement("script");
+        tag.async = true;
+        tag.src = "https://www.googletagmanager.com/gtag/js?id=" + gaId;
+        document.head.appendChild(tag);
 
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        window.dataLayer.push(arguments);
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          window.dataLayer.push(arguments);
+        }
+        window.gtag = gtag;
+        gtag("js", new Date());
+        gtag("config", gaId);
+      };
+
+      var events = ["scroll", "pointerdown", "keydown", "touchstart"];
+      var kick = function () {
+        events.forEach(function (e) {
+          window.removeEventListener(e, kick, { passive: true });
+        });
+        load();
+      };
+      events.forEach(function (e) {
+        window.addEventListener(e, kick, { passive: true, once: true });
+      });
+
+      // Fallback so a visitor who never interacts is still counted.
+      if ("requestIdleCallback" in window) {
+        requestIdleCallback(load, { timeout: 4000 });
+      } else {
+        setTimeout(load, 4000);
       }
-      window.gtag = gtag;
-      gtag("js", new Date());
-      gtag("config", gaId);
     }
   </script>
 </body>

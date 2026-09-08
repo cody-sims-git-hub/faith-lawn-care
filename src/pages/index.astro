@@ -7,9 +7,10 @@ import ServiceCard from "~/components/ServiceCard.astro";
 import CoverageMap from "~/components/CoverageMap.astro";
 import FaqList from "~/components/FaqList.astro";
 import CtaBand from "~/components/CtaBand.astro";
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import { ArrowRight, PhoneCall, ClipboardList, Sparkles, Phone } from "@lucide/astro";
 
+import heroImage from "~/assets/hero-lawn.jpg";
 import lawnPhoto from "~/assets/lawn-brick-house.jpg";
 import { featuredServices, services } from "~/lib/services";
 import { faqs } from "~/lib/faq";
@@ -35,6 +36,20 @@ const steps = [
 ];
 
 const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
+
+// Preload the hero image (the LCP element) from <head>. These options MUST
+// match the <Image> in Hero.astro exactly, or getImage generates a second,
+// differently-hashed set and the preload goes to waste. format:"webp" is
+// pinned in both places to keep the srcset identical.
+const heroPreload = await getImage({
+ src: heroImage,
+ widths: [640, 960, 1280, 1600, 1920],
+ sizes: "100vw",
+ width: 1920,
+ height: 1080,
+ quality: 58,
+ format: "webp",
+});
 ---
 
 <Layout
@@ -42,6 +57,10 @@ const jsonLd = [localBusiness(), serviceCatalog(services), faqPage([...faqs])];
  description="Full-service lawn care, landscaping, tree work, pressure washing, and junk removal in Blountstown and across Calhoun, Liberty, and Jackson counties."
  path="/"
  jsonLd={jsonLd}
+ preloadImage={{
+ imagesrcset: heroPreload.srcSet.attribute,
+ imagesizes: "100vw",
+ }}
 >
  <Hero />
 
