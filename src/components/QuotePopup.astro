@@ -55,6 +55,14 @@ const SESSION_KEY = "flc.quotePopup.autoOpened";
     async submit(event) {
       const form = event.target;
       if (!form.reportValidity()) return;
+      const phone = (form.phone && form.phone.value || '').trim();
+      const email = (form.email && form.email.value || '').trim();
+      if (!phone && !email) {
+        this.status = 'error';
+        this.error = 'Add a phone or email so we can reach you.';
+        if (form.phone) form.phone.focus();
+        return;
+      }
       this.status = 'sending';
       this.error = '';
       try {
@@ -143,8 +151,15 @@ const SESSION_KEY = "flc.quotePopup.autoOpened";
         </div>
         <div>
           <label for="popup-phone" class="sr-only">Phone</label>
-          <input id="popup-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" placeholder="Phone" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
+          <input id="popup-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Phone" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
         </div>
+        <div>
+          <label for="popup-email" class="sr-only">Email</label>
+          <input id="popup-email" name="email" type="email" autocomplete="email" placeholder="Email" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
+        </div>
+        <p class="-mt-0.5 px-0.5 text-[0.68rem] text-ink-faint">
+          A phone number or email — whichever&rsquo;s easier to reach you.
+        </p>
         <div>
           <label for="popup-town" class="sr-only">Town</label>
           <input id="popup-town" name="town" type="text" required autocomplete="address-level2" placeholder="Town" class="w-full rounded-sm border border-rule-strong px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-grass focus:outline-none" />
