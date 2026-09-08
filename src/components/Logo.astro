@@ -19,25 +19,26 @@ interface Props {
 const { compact = false, class: className = "" } = Astro.props;
 ---
 
-<span class={`inline-flex items-center gap-2.5 ${className}`}>
-  <span
-    class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-forest text-white"
+<span class={`inline-flex items-center gap-2 ${className}`}>
+  {/*
+    The grass mark sits directly on the white header — green blades, no square.
+    A hair taller than the wordmark's cap height so the tuft reads clearly. It
+    takes currentColor from --grass so it stays sharp at any size.
+  */}
+  <svg
+    class="h-8 w-8 shrink-0 text-grass"
+    viewBox="0 0 64 64"
+    fill="currentColor"
+    aria-hidden="true"
   >
-    <svg
-      class="h-[1.35rem] w-[1.35rem]"
-      viewBox="0 0 64 64"
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M20.9,56Q18.37,32.96 6.5,24Q20.41,32.96 24.3,56Z"></path>
-      <path d="M24.1,56Q22.6,26.48 14,15Q24.64,26.48 27.5,56Z"></path>
-      <path d="M27.15,56Q26.81,22.52 22.5,9.5Q28.91,22.52 30.65,56Z"></path>
-      <path d="M30.15,56Q30.89,20 32,6Q33.11,20 33.85,56Z"></path>
-      <path d="M33.35,56Q35.09,22.52 41.5,9.5Q37.19,22.52 36.85,56Z"></path>
-      <path d="M36.5,56Q39.36,26.48 50,15Q41.4,26.48 39.9,56Z"></path>
-      <path d="M39.7,56Q43.59,32.96 57.5,24Q45.63,32.96 43.1,56Z"></path>
-    </svg>
-  </span>
+    <path d="M20.9,56Q18.37,32.96 6.5,24Q20.41,32.96 24.3,56Z"></path>
+    <path d="M24.1,56Q22.6,26.48 14,15Q24.64,26.48 27.5,56Z"></path>
+    <path d="M27.15,56Q26.81,22.52 22.5,9.5Q28.91,22.52 30.65,56Z"></path>
+    <path d="M30.15,56Q30.89,20 32,6Q33.11,20 33.85,56Z"></path>
+    <path d="M33.35,56Q35.09,22.52 41.5,9.5Q37.19,22.52 36.85,56Z"></path>
+    <path d="M36.5,56Q39.36,26.48 50,15Q41.4,26.48 39.9,56Z"></path>
+    <path d="M39.7,56Q43.59,32.96 57.5,24Q45.63,32.96 43.1,56Z"></path>
+  </svg>
 
   <span class="flex flex-col leading-none">
     <span class="font-display text-[1.35rem] tracking-[-0.035em] text-ink">
