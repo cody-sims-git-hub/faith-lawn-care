@@ -6,9 +6,11 @@ import SectionHeading from "~/components/SectionHeading.astro";
 import ServiceCard from "~/components/ServiceCard.astro";
 import FaqList from "~/components/FaqList.astro";
 import CtaBand from "~/components/CtaBand.astro";
+import { Image } from "astro:assets";
 import { Phone, MessageSquare, MapPin, Clock, Check, ArrowRight } from "@lucide/astro";
 import { areasWithPages, tierLabels, tierBlurbs, getArea, hasAreaPage, type Area } from "~/lib/areas";
 import { getAreaContent } from "~/lib/area-content";
+import { pickAreaPhoto } from "~/lib/area-photos";
 import { services, featuredServices } from "~/lib/services";
 import { faqs as globalFaqs } from "~/lib/faq";
 import { localBusiness, breadcrumbs, serviceCatalog, faqPage } from "~/lib/structured-data";
@@ -26,6 +28,10 @@ interface Props {
 }
 const { area } = Astro.props;
 const content = getAreaContent(area.slug)!;
+
+// One lawn photo per town, rotated deterministically from the shared pool so the
+// page carries a real visual without any town-specific photo claim.
+const photo = pickAreaPhoto(area.slug);
 
 // Town FAQ = the town-specific questions, plus two universal ones people always
 // ask, so every town page still answers "insured?" and "one-time jobs?".
@@ -112,6 +118,21 @@ const jsonLd = [
             }
           </ul>
         </div>
+
+        <figure class="card mt-10 overflow-hidden" data-reveal="right">
+          <Image
+            src={photo.image}
+            alt={photo.alt}
+            widths={[480, 720, 1080]}
+            sizes="(min-width: 1024px) 60vw, 95vw"
+            quality={68}
+            loading="lazy"
+            class="w-full object-cover"
+          />
+          <figcaption class="border-t border-rule bg-paper px-5 py-4 text-sm text-ink-soft">
+            {photo.caption}
+          </figcaption>
+        </figure>
       </div>
 
       {/* Coverage / booking card */}
