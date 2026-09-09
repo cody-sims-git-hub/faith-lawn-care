@@ -1,0 +1,47 @@
+{
+  // Dev environment for GitHub Codespaces (and VS Code "Reopen in Container").
+  //
+  // This lives at the repo root so it applies to the WHOLE repository: a
+  // Codespace created from any branch that carries this file gets the same
+  // Node toolchain, installed dependencies, and a forwarded Astro dev port.
+  // Merge it to `main` and every future branch inherits it automatically.
+  //
+  // Astro is static (SSG) and the only runtime is Node + npm, so there is no
+  // database or service to orchestrate — a single Node image is all it needs.
+  "name": "Faith Lawn Care (Astro)",
+
+  // Node 22 to satisfy package.json engines (">=22.12.0"). The devcontainers
+  // javascript-node image already bundles git, npm, and common build tools.
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+
+  // Reproducible install from the committed lockfile, once, when the container
+  // is first created. Kept in a lifecycle hook (not baked into the image) so it
+  // re-runs whenever the lockfile changes.
+  "postCreateCommand": "npm ci",
+
+  // Astro's dev server listens on 4321. Forward it and pop the preview open as
+  // soon as `npm run dev` starts serving.
+  "forwardPorts": [4321],
+  "portsAttributes": {
+    "4321": {
+      "label": "Astro dev server",
+      "onAutoForward": "openPreview"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      // The extensions that make this stack pleasant to work in — Astro
+      // language support and Tailwind IntelliSense over the design tokens.
+      "extensions": [
+        "astro-build.astro-vscode",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+
+  // Not auto-starting the dev server on attach: a blocking lifecycle hook would
+  // seize the terminal and re-fire on every reconnect. Start it yourself with
+  // `npm run dev` — the forwarded port above then opens the preview on its own.
+}

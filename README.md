@@ -72,6 +72,21 @@ npm run audit:selftest   # prove the audit's own rules still fire
 the DOM lib declare the same globals with different shapes; loading both into
 one program produces a wall of false conflicts.
 
+## Development in GitHub Codespaces
+
+`.devcontainer/devcontainer.json` lets any branch be opened in a Codespace (or
+locally via VS Code's *Reopen in Container*) with the toolchain ready to go. It
+pins Node 22, runs `npm ci` on create, and forwards Astro's dev port (4321).
+
+1. **Code → Create codespace** on the branch you want.
+2. Wait for `npm ci` to finish (first launch only).
+3. Run `npm run dev`; the forwarded 4321 port opens a live preview automatically.
+
+Because the file sits at the repo root, it applies to the whole repository —
+once it is on `main`, every future branch inherits the same setup with no extra
+steps. It configures the dev environment only and has no effect on the build or
+the Cloudflare Pages deploy.
+
 ## Deployment
 
 `.github/workflows/deploy.yml` validates every PR and push, and publishes to
