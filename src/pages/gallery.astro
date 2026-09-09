@@ -9,6 +9,16 @@ import FacebookIcon from "~/components/FacebookIcon.astro";
 import heroLawn from "~/assets/hero-lawn.jpg";
 import lawnBrickHouse from "~/assets/lawn-brick-house.jpg";
 import flyer from "~/assets/flyer.jpg";
+import farmhouseBefore from "~/assets/farmhouse-acreage-before.jpg";
+import farmhouseAfter from "~/assets/farmhouse-acreage-after.jpg";
+import crewBlowing from "~/assets/crew-blowing-clippings.jpg";
+import mobileHomeLawn from "~/assets/mobile-home-lawn.jpg";
+import frontLawnGreen from "~/assets/front-lawn-green.jpg";
+import roofWashCrew from "~/assets/pressure-washing-roof-crew.jpg";
+import roofWashDetail from "~/assets/pressure-washing-roof-detail.jpg";
+import ranchHouseLawn from "~/assets/ranch-house-lawn.jpg";
+import roadsideLawn from "~/assets/roadside-lawn-mowed.jpg";
+import streetLawnStriped from "~/assets/street-lawn-striped.jpg";
 import { FACEBOOK_URL } from "~/lib/site-meta";
 import { localBusiness, breadcrumbs } from "~/lib/structured-data";
 
@@ -38,12 +48,102 @@ const shots = [
  wide: true,
  },
  {
+ image: farmhouseBefore,
+ width: 1286,
+ height: 579,
+ alt: "An acreage lot around a farmhouse in the Florida Panhandle with tall, overgrown summer grass before Faith Lawn Care cut it back",
+ caption: "Before — grass gotten ahead of them",
+ detail: "A wet stretch and a big lot; the mowing had fallen behind.",
+ wide: false,
+ },
+ {
+ image: farmhouseAfter,
+ width: 1286,
+ height: 579,
+ alt: "The same Panhandle acreage lot after Faith Lawn Care mowed it, cut clean around the farmhouse and back to the treeline",
+ caption: "After — same lot, one visit",
+ detail: "Knocked down, cleaned up, and cut back to the treeline.",
+ wide: false,
+ },
+ {
+ image: roofWashCrew,
+ width: 1500,
+ height: 1125,
+ alt: "A Faith Lawn Care crew member on the metal roof of a brick Panhandle home, pressure washing it with a hose run up from the machine on the driveway",
+ caption: "Roof wash in progress",
+ detail: "Up on the metal, lifting off years of streaking and mildew.",
+ wide: false,
+ },
+ {
+ image: roofWashDetail,
+ width: 1500,
+ height: 1125,
+ alt: "A close look down a metal roof mid-wash, the cleaned panels bright against the brown streaking still left on the unwashed sections",
+ caption: "Half done, so you can see it",
+ detail: "Clean panels on one side, the grime it started with on the other.",
+ wide: false,
+ },
+ {
+ image: crewBlowing,
+ width: 960,
+ height: 720,
+ alt: "A Faith Lawn Care crew member using a backpack blower to clear grass clippings off the sidewalk after mowing a Panhandle yard",
+ caption: "The finishing pass",
+ detail: "Every job ends with the walks and drive blown clean.",
+ wide: false,
+ },
+ {
  image: lawnBrickHouse,
  width: 960,
  height: 720,
  alt: "A large striped lawn in front of a brick house, freshly cut by Faith Lawn Care",
  caption: "Residential property, full cut",
  detail: "Mowed, edged, and blown off — the standard weekly visit.",
+ wide: false,
+ },
+ {
+ image: mobileHomeLawn,
+ width: 1500,
+ height: 676,
+ alt: "A freshly mowed green lawn around a manufactured home in the Florida Panhandle, trimmed out to the treeline",
+ caption: "Manufactured-home lot, full cut",
+ detail: "Mowed, trimmed, and cleared right out to the trees.",
+ wide: false,
+ },
+ {
+ image: frontLawnGreen,
+ width: 1140,
+ height: 855,
+ alt: "A thick, freshly cut and edged front lawn running out to the driveway of a Panhandle home",
+ caption: "Thick front lawn, edged clean",
+ detail: "Cut and edged sharp along the walk and driveway.",
+ wide: false,
+ },
+ {
+ image: ranchHouseLawn,
+ width: 960,
+ height: 540,
+ alt: "A wide open lawn freshly mowed in front of a ranch-style Panhandle home, cut clean around the beds and trees",
+ caption: "Open yard, mowed around the beds",
+ detail: "Cut clean around the porch, beds, and trees.",
+ wide: false,
+ },
+ {
+ image: roadsideLawn,
+ width: 1500,
+ height: 1125,
+ alt: "A roadside lot in the Florida Panhandle freshly mowed level from the highway shoulder back toward the home",
+ caption: "Roadside lot, edge to edge",
+ detail: "Mowed level from the highway shoulder back to the house.",
+ wide: false,
+ },
+ {
+ image: streetLawnStriped,
+ width: 1500,
+ height: 1125,
+ alt: "A neighborhood front lawn cut in clean stripes along the sidewalk on a shaded Florida Panhandle street",
+ caption: "Striped down the block",
+ detail: "Front lawn cut in clean stripes along the sidewalk.",
  wide: false,
  },
  {
